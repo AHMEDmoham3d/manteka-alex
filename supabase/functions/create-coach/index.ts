@@ -7,7 +7,7 @@ const supabaseAdmin = createClient(
 );
 
 // ضع هنا رابط موقعك النهائي بعد رفعه
-const FRONTEND_URL = "https://mywebsite.com";
+const FRONTEND_URL = "https://manteka-alex-ebiw.vercel.app";
 
 Deno.serve(async (req) => {
   // 1️⃣ التعامل مع طلبات Preflight (CORS)
@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
       headers: {
         "Access-Control-Allow-Origin": FRONTEND_URL,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info",
       },
     });
   }
