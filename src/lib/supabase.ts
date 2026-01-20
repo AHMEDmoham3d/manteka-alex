@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// استخدام القيم مباشرة بدلاً من متغيرات البيئة
+const supabaseUrl = 'https://qnozlrgdqrnayuixtwmd.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFub3pscmdkcXJuYXl1aXh0d21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NzEzNTIsImV4cCI6MjA3MjA0NzM1Mn0.GeAFug9yoKYoGmXE3kgC4WsdVu08KHarr-tMbsaYDyo';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -23,12 +24,40 @@ export interface Profile {
   organization?: Organization;
 }
 
+export interface Coach extends Profile {
+  email: string;
+  // Coach is a Profile with role 'coach'
+}
+
 export interface Player {
+  organization: any;
   id: string;
   full_name: string;
   age: number | null;
   belt: string | null;
   coach_id: string;
+  file_number: string | null;
+  birth_date: string | null;
   created_at: string;
   coach?: Profile;
+  registered?: boolean;
+}
+
+export interface ExamPeriod {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+}
+
+export interface ExamRegistration {
+  id: string;
+  exam_period_id: string;
+  player_id: string;
+  coach_id: string;
+  player_name: string;
+  birth_date: string | null;
+  last_belt: string | null;
+  registered_at: string;
 }

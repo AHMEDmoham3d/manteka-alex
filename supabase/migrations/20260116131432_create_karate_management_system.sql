@@ -58,7 +58,30 @@ CREATE TABLE IF NOT EXISTS players (
   age integer,
   belt text,
   coach_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  file_number text,
   created_at timestamptz DEFAULT now()
+);
+
+-- إنشاء جدول مواعيد الاختبارات
+CREATE TABLE IF NOT EXISTS exam_periods (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  start_date date NOT NULL,
+  end_date date NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+-- إنشاء جدول تسجيلات الاختبارات
+CREATE TABLE IF NOT EXISTS exam_registrations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  exam_period_id uuid NOT NULL REFERENCES exam_periods(id) ON DELETE CASCADE,
+  player_id uuid NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+  coach_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  player_name text NOT NULL,
+  birth_date date,
+  last_belt text,
+  registered_at timestamptz DEFAULT now(),
+  UNIQUE(exam_period_id, player_id)
 );
 
 -- إنشاء دالة للتحقق من دور المدرب
@@ -85,6 +108,8 @@ CREATE TRIGGER ensure_player_has_coach
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exam_periods ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exam_registrations ENABLE ROW LEVEL SECURITY;
 
 -- سياسات الأمان للمؤسسات (organizations)
 CREATE POLICY "Admin can view all organizations"
@@ -259,6 +284,119 @@ CREATE POLICY "Admin can delete players"
     )
   );
 
+-- سياسات الأمان لفترات الاختبار (exam_periods)
+CREATE POLICY "Admin can view all exam periods"
+  ON exam_periods FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Coach can view exam periods"
+  ON exam_periods FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+    )
+  );
+
+CREATE POLICY "Admin can insert exam periods"
+  ON exam_periods FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admin can update exam periods"
+  ON exam_periods FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admin can delete exam periods"
+  ON exam_periods FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- سياسات الأمان لتسجيلات الاختبار (exam_registrations)
+CREATE POLICY "Admin can view all exam registrations"
+  ON exam_registrations FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Coach can view own exam registrations"
+  ON exam_registrations FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+      AND profiles.id = exam_registrations.coach_id
+    )
+  );
+
+CREATE POLICY "Coach can insert exam registrations"
+  ON exam_registrations FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+      AND profiles.id = exam_registrations.coach_id
+    )
+  );
+
+CREATE POLICY "Admin can delete exam registrations"
+  ON exam_registrations FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
 -- إنشاء indexes لتحسين الأداء
 CREATE INDEX IF NOT EXISTS idx_profiles_organization_id ON profiles(organization_id);
 CREATE INDEX IF NOT EXISTS idx_players_coach_id ON players(coach_id);
+CREATE INDEX IF NOT EXISTS idx_exam_registrations_exam_period_id ON exam_registrations(exam_period_id);
+CREATE INDEX IF NOT EXISTS idx_exam_registrations_player_id ON exam_registrations(player_id);
+CREATE INDEX IF NOT EXISTS idx_exam_registrations_coach_id ON exam_registrations(coach_id);
