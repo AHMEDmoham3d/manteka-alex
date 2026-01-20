@@ -14,11 +14,15 @@ import {
   Calendar
 } from 'lucide-react';
 
-// إنشاء عميل Supabase مع متغيرات البيئة من Vite
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+// تحقق من متغيرات البيئة وإنشاء عميل Supabase
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error("Supabase env variables are missing");
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods';
 
