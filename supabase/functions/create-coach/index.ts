@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
       headers: {
         "Access-Control-Allow-Origin": FRONTEND_URL,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey",
       },
     });
   }
