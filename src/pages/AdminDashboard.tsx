@@ -27,6 +27,32 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Edge Function URL لإنشاء المدربين
 const CREATE_COACH_FUNCTION_URL = "https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach";
 
+// دالة مساعدة لإضافة المدرب عبر Edge Function
+async function addCoach(email: string, password: string, full_name: string, organization_id: string) {
+  try {
+    const res = await fetch(CREATE_COACH_FUNCTION_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, full_name, organization_id }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Error adding coach:", data.error);
+      throw new Error(data.error || "حدث خطأ أثناء إضافة المدرب");
+    }
+
+    console.log("Coach added successfully", data);
+    return data;
+  } catch (err: any) {
+    console.error("Fetch error:", err);
+    throw new Error(err.message || "حدث خطأ أثناء الاتصال بالخادم");
+  }
+}
+
 type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods';
 
 export default function AdminDashboard() {
@@ -467,32 +493,6 @@ function ExamPeriodsTable({
   );
 }
 
-// دالة مساعدة لإضافة المدرب عبر Edge Function
-async function addCoach(email: string, password: string, full_name: string, organization_id: string) {
-  try {
-    const res = await fetch("https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, full_name, organization_id }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Error adding coach:", data.error);
-      throw new Error(data.error || "حدث خطأ أثناء إضافة المدرب");
-    }
-
-    console.log("Coach added successfully", data);
-    return data;
-  } catch (err: any) {
-    console.error("Fetch error:", err);
-    throw new Error(err.message || "حدث خطأ أثناء الاتصال بالخادم");
-  }
-}
-
 function FormModal({
   type,
   editingId,
@@ -637,7 +637,7 @@ function FormModal({
         throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان');
       }
 
-      // استخدام دالة addCoach لإنشاء المدرب
+      // استخدام دالة addCoach لإنشاء المدرب عبر Edge Function
       await addCoach(
         formData.email,
         formData.password,
