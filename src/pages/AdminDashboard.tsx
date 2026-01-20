@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase, Organization, Coach, Player, ExamPeriod } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { Organization, Coach, Player, ExamPeriod } from '../lib/supabase';
 import {
   LogOut,
   Building2,
@@ -13,9 +14,11 @@ import {
   Calendar
 } from 'lucide-react';
 
-// Supabase configuration constants
-const supabaseUrl = 'https://qnozlrgdqrnayuixtwmd.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFub3pscmdkcXJuYXl1aXh0d21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NzEzNTIsImV4cCI6MjA3MjA0NzM1Mn0.GeAFug9yoKYoGmXE3kgC4WsdVu08KHarr-tMbsaYDyo';
+// إنشاء عميل Supabase مع متغيرات البيئة من Vite
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods';
 
