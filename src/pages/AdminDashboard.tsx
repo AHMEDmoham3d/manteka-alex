@@ -24,6 +24,9 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Edge Function URL لإنشاء المدربين
+const CREATE_COACH_FUNCTION_URL = "https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach";
+
 type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods';
 
 export default function AdminDashboard() {
@@ -464,6 +467,37 @@ function ExamPeriodsTable({
   );
 }
 
+// دالة مساعدة لإضافة المدرب عبر Edge Function
+async function addCoach(email: string, password: string, full_name: string, organization_id: string) {
+  try {
+    const res = await fetch("https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseKey,
+        "Authorization": `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name,
+        organization_id,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("تم إضافة المدرب بنجاح!");
+    } else {
+      console.error(data.error);
+      throw new Error(data.error || "حدث خطأ أثناء إضافة المدرب");
+    }
+  } catch (err: any) {
+    console.error(err);
+    throw new Error(err.message || "خطأ في الشبكة");
+  }
+}
+
 function FormModal({
   type,
   editingId,
@@ -608,33 +642,13 @@ function FormModal({
         throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان');
       }
 
-      // الحصول على الـ URL من متغير البيئة أو استخدام القيمة المباشرة
-      const edgeFunctionUrl = "https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach";
-      
-      const response = await fetch(edgeFunctionUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          full_name: formData.full_name,
-          organization_id: formData.organization_id,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || `خطأ في الطلب: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.error) {
-        throw new Error(result.error);
-      }
+      // استخدام دالة addCoach لإنشاء المدرب
+      await addCoach(
+        formData.email,
+        formData.password,
+        formData.full_name,
+        formData.organization_id
+      );
     }
   };
 
