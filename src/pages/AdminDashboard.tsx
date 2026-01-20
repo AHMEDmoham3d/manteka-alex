@@ -14,7 +14,6 @@ import {
   Calendar
 } from 'lucide-react';
 
-// تحقق من متغيرات البيئة وإنشاء عميل Supabase
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -24,10 +23,8 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Edge Function URL لإنشاء المدربين
 const CREATE_COACH_FUNCTION_URL = "https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach";
 
-// دالة مساعدة لإضافة المدرب عبر Edge Function
 async function addCoach(email: string, password: string, full_name: string, organization_id: string) {
   try {
     const res = await fetch(CREATE_COACH_FUNCTION_URL, {
@@ -564,7 +561,6 @@ function FormModal({
       if (error) throw error;
 
       if (data) {
-        // تحويل التواريخ للصيغة الصحيحة لعناصر input[type="date"]
         if (type === 'exam_periods' && data.start_date) {
           data.start_date = new Date(data.start_date).toISOString().split('T')[0];
         }
@@ -622,7 +618,6 @@ function FormModal({
 
   const saveCoach = async () => {
     if (editingId) {
-      // تحديث بيانات المدرب الموجود
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -632,12 +627,10 @@ function FormModal({
         .eq('id', editingId);
       if (error) throw error;
     } else {
-      // إنشاء مدرب جديد باستخدام Edge Function
       if (!formData.email || !formData.password) {
         throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان');
       }
 
-      // استخدام دالة addCoach لإنشاء المدرب عبر Edge Function
       await addCoach(
         formData.email,
         formData.password,
