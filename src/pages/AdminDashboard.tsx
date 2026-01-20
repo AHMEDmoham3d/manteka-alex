@@ -474,27 +474,22 @@ async function addCoach(email: string, password: string, full_name: string, orga
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": supabaseKey,
-        "Authorization": `Bearer ${supabaseKey}`,
       },
-      body: JSON.stringify({
-        email,
-        password,
-        full_name,
-        organization_id,
-      }),
+      body: JSON.stringify({ email, password, full_name, organization_id }),
     });
 
     const data = await res.json();
-    if (data.success) {
-      alert("تم إضافة المدرب بنجاح!");
-    } else {
-      console.error(data.error);
+
+    if (!res.ok) {
+      console.error("Error adding coach:", data.error);
       throw new Error(data.error || "حدث خطأ أثناء إضافة المدرب");
     }
+
+    console.log("Coach added successfully", data);
+    return data;
   } catch (err: any) {
-    console.error(err);
-    throw new Error(err.message || "خطأ في الشبكة");
+    console.error("Fetch error:", err);
+    throw new Error(err.message || "حدث خطأ أثناء الاتصال بالخادم");
   }
 }
 
