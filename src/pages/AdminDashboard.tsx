@@ -604,25 +604,21 @@ function FormModal({
         throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان');
       }
 
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      const { data: user, error: signUpError } = await supabase.auth.admin.createUser({
         email: formData.email,
         password: formData.password,
       });
+      if (signUpError) throw signUpError;
 
-      if (authError) throw authError;
-
-      const { error: profileError } = await supabase
+      const { error: insertError } = await supabase
         .from('profiles')
-        .insert([
-          {
-            id: authData.user.id,
-            full_name: formData.full_name,
-            role: 'coach',
-            organization_id: formData.organization_id,
-          },
-        ]);
-
-      if (profileError) throw profileError;
+        .insert([{
+          id: user.user.id,
+          full_name: formData.full_name,
+          role: 'coach',
+          organization_id: formData.organization_id
+        }]);
+      if (insertError) throw insertError;
     }
   };
 
