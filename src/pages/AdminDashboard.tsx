@@ -164,9 +164,9 @@ export default function AdminDashboard() {
             </nav>
           </div>
 
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {activeTab === 'organizations' && 'النوادي ومراكز الشباب'}
                 {activeTab === 'coaches' && 'المدربين'}
                 {activeTab === 'players' && 'اللاعبين'}
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
                   setEditingId(null);
                   setShowModal(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 <span>إضافة جديد</span>
@@ -265,41 +265,34 @@ function OrganizationsTable({
   onEdit: (id: string) => void;
 }) {
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b bg-gray-50">
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">النوع</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        {organizations.map((org) => (
-          <tr key={org.id} className="border-b hover:bg-gray-50">
-            <td className="px-6 py-4 text-sm text-gray-900">{org.name}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">
-              {org.type === 'club' ? 'نادي' : 'مركز شباب'}
-            </td>
-            <td className="px-6 py-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onEdit(org.id)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => onDelete(org.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="block lg:hidden space-y-4">
+      {organizations.map((org) => (
+        <div key={org.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <h3 className="font-semibold text-gray-900">{org.name}</h3>
+              <p className="text-sm text-gray-600">
+                {org.type === 'club' ? 'نادي' : 'مركز شباب'}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEdit(org.id)}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onDelete(org.id)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -313,26 +306,20 @@ function CoachesTable({
   onEdit: (id: string) => void;
 }) {
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b bg-gray-50">
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الدور</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      <div className="block lg:hidden space-y-4">
         {coaches.map((coach) => (
-          <tr key={coach.id} className="border-b hover:bg-gray-50">
-            <td className="px-6 py-4 text-sm text-gray-900">{coach.full_name}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">
-              {coach.role === 'coach' ? 'مدرب' : 'مدير'}
-            </td>
-            <td className="px-6 py-4 text-sm text-gray-600">
-              {coach.organization?.name}
-            </td>
-            <td className="px-6 py-4">
+          <div key={coach.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900">{coach.full_name}</h3>
+                <p className="text-sm text-gray-600">
+                  {coach.role === 'coach' ? 'مدرب' : 'مدير'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {coach.organization?.name}
+                </p>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => onEdit(coach.id)}
@@ -347,11 +334,50 @@ function CoachesTable({
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            </td>
-          </tr>
+            </div>
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+      <table className="hidden lg:block w-full">
+        <thead>
+          <tr className="border-b bg-gray-50">
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الدور</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {coaches.map((coach) => (
+            <tr key={coach.id} className="border-b hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm text-gray-900">{coach.full_name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {coach.role === 'coach' ? 'مدرب' : 'مدير'}
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {coach.organization?.name}
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(coach.id)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(coach.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -425,22 +451,20 @@ function ExamPeriodsTable({
   onEdit: (id: string) => void;
 }) {
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b bg-gray-50">
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ البداية</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ النهاية</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      <div className="block lg:hidden space-y-4">
         {examPeriods.map((period) => (
-          <tr key={period.id} className="border-b hover:bg-gray-50">
-            <td className="px-6 py-4 text-sm text-gray-900">{period.name}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">{new Date(period.start_date).toLocaleDateString('ar-EG')}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">{new Date(period.end_date).toLocaleDateString('ar-EG')}</td>
-            <td className="px-6 py-4">
+          <div key={period.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900">{period.name}</h3>
+                <p className="text-sm text-gray-600">
+                  من: {new Date(period.start_date).toLocaleDateString('ar-EG')}
+                </p>
+                <p className="text-sm text-gray-600">
+                  إلى: {new Date(period.end_date).toLocaleDateString('ar-EG')}
+                </p>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => onEdit(period.id)}
@@ -455,11 +479,46 @@ function ExamPeriodsTable({
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            </td>
-          </tr>
+            </div>
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+      <table className="hidden lg:block w-full">
+        <thead>
+          <tr className="border-b bg-gray-50">
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ البداية</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ النهاية</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {examPeriods.map((period) => (
+            <tr key={period.id} className="border-b hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm text-gray-900">{period.name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">{new Date(period.start_date).toLocaleDateString('ar-EG')}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">{new Date(period.end_date).toLocaleDateString('ar-EG')}</td>
+              <td className="px-6 py-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(period.id)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(period.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
