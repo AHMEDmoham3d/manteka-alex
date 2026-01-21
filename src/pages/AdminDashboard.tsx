@@ -23,33 +23,6 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const CREATE_COACH_FUNCTION_URL = "https://qnozlrgdqrnayuixtwmd.supabase.co/functions/v1/create-coach";
-
-async function addCoach(email: string, password: string, full_name: string, organization_id: string) {
-  try {
-    const res = await fetch(CREATE_COACH_FUNCTION_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, full_name, organization_id }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Error adding coach:", data.error);
-      throw new Error(data.error || "حدث خطأ أثناء إضافة المدرب");
-    }
-
-    console.log("Coach added successfully", data);
-    return data;
-  } catch (err: any) {
-    console.error("Fetch error:", err);
-    throw new Error(err.message || "حدث خطأ أثناء الاتصال بالخادم");
-  }
-}
-
 type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods';
 
 export default function AdminDashboard() {
@@ -631,12 +604,25 @@ function FormModal({
         throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان');
       }
 
-      await addCoach(
-        formData.email,
-        formData.password,
-        formData.full_name,
-        formData.organization_id
-      );
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (authError) throw authError;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: authData.user.id,
+            full_name: formData.full_name,
+            role: 'coach',
+            organization_id: formData.organization_id,
+          },
+        ]);
+
+      if (profileError) throw profileError;
     }
   };
 
