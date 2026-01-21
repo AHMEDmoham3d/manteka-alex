@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Player, Coach } from '../lib/supabase';
 import type { ExamPeriod } from '../lib/supabase';
-import { LogOut, Search, UserCircle, CheckCircle, XCircle } from 'lucide-react';
+import { LogOut, Search, UserCircle, CheckCircle, XCircle, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 export default function CoachDashboard() {
   const { signOut, user } = useAuth();
@@ -78,6 +79,77 @@ export default function CoachDashboard() {
     }
   };
 
+  const downloadRegisteredPlayers = () => {
+    if (registeredPlayers.length === 0) {
+      alert('لا يوجد لاعبين مسجلين للتحميل');
+      return;
+    }
+
+    // تحضير البيانات للتصدير
+    const exportData = registeredPlayers.map((player, index) => {
+      const playerData = players.find(p => p.id === player.player_id);
+      return {
+        'م': index + 1,
+        'اسم اللاعب': player.player_name,
+        'الحزام الأخير': getBeltName(player.last_belt || 'white'),
+        'تاريخ الميلاد': player.birth_date ? formatDate(player.birth_date) : 'غير محدد',
+        'العمر': playerData?.age || 'غير محدد',
+        'تاريخ التسجيل': formatDate(player.created_at),
+        'رقم تسجيل اللاعب': player.player_id,
+        'رقم تسجيل المدرب': player.coach_id || user?.id,
+        'فترة الاختبار': activeExam ? `${activeExam.start_date} إلى ${activeExam.end_date}` : 'غير محدد'
+      };
+    });
+
+    // إضافة معلومات إضافية
+    const summary = [
+      {},
+      {
+        'م': 'ملخص',
+        'اسم اللاعب': `إجمالي عدد اللاعبين: ${registeredPlayers.length}`,
+        'الحزام الأخير': `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
+        'تاريخ الميلاد': `المؤسسة: ${coach?.organization?.name || 'غير محدد'}`,
+        'العمر': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+        'تاريخ التسجيل': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
+        'رقم تسجيل اللاعب': '',
+        'رقم تسجيل المدرب': '',
+        'فترة الاختبار': ''
+      },
+      {}
+    ];
+
+    const finalData = [...exportData, ...summary];
+
+    // إنشاء ورقة عمل
+    const ws = XLSX.utils.json_to_sheet(finalData, { skipHeader: false });
+    
+    // ضبط عرض الأعمدة
+    const wscols = [
+      { wch: 5 },  // م
+      { wch: 25 }, // اسم اللاعب
+      { wch: 15 }, // الحزام الأخير
+      { wch: 15 }, // تاريخ الميلاد
+      { wch: 10 }, // العمر
+      { wch: 15 }, // تاريخ التسجيل
+      { wch: 20 }, // رقم تسجيل اللاعب
+      { wch: 20 }, // رقم تسجيل المدرب
+      { wch: 30 }  // فترة الاختبار
+    ];
+    ws['!cols'] = wscols;
+
+    // إنشاء مصنف وإضافة الورقة
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين المسجلين');
+
+    // توليد اسم الملف
+    const fileName = `لاعبين_مسجلين_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    // تحميل الملف
+    XLSX.writeFile(wb, fileName);
+    
+    alert(`تم تحميل ملف ${fileName} بنجاح`);
+  };
+
   useEffect(() => {
     const loadCoachData = async () => {
       if (!user) return;
@@ -121,7 +193,8 @@ export default function CoachDashboard() {
               player_name,
               birth_date,
               last_belt,
-              created_at
+              created_at,
+              coach_id
             `)
             .eq('coach_id', user.id)
             .eq('exam_period_id', activeExamData.id);
@@ -241,9 +314,18 @@ export default function CoachDashboard() {
                 <CheckCircle className="w-5 h-5" />
                 اللاعبين المسجلين في الاختبار الحالي
               </h3>
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                {registeredPlayers.length} لاعب
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  {registeredPlayers.length} لاعب
+                </span>
+                <button
+                  onClick={downloadRegisteredPlayers}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                >
+                  <Download className="w-4 h-4" />
+                  تحميل قائمة اللاعبين
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
