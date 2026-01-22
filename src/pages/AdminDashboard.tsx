@@ -489,7 +489,7 @@ function OrganizationsTable({
   onEdit: (id: string) => void;
 }) {
   return (
-    <div className="block lg:hidden space-y-4">
+    <div className="block space-y-4">
       {organizations.map((org) => (
         <div key={org.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-start mb-3">
