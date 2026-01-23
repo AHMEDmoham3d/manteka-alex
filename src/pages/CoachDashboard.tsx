@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Player, Coach } from '../lib/supabase';
-import type { ExamPeriod, SecondaryRegistrationPeriod, TournamentPeriod } from '../lib/supabase';
-import { LogOut, Search, UserCircle, CheckCircle, XCircle, Download, BookOpen, Trophy } from 'lucide-react';
+import type { ExamPeriod, SecondaryRegistrationPeriod } from '../lib/supabase';
+import { LogOut, Search, UserCircle, CheckCircle, XCircle, Download, BookOpen } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function CoachDashboard() {
@@ -12,12 +12,10 @@ export default function CoachDashboard() {
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [registeredPlayers, setRegisteredPlayers] = useState<any[]>([]);
   const [secondaryRegisteredPlayers, setSecondaryRegisteredPlayers] = useState<any[]>([]);
-  const [tournamentRegisteredPlayers, setTournamentRegisteredPlayers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeExam, setActiveExam] = useState<ExamPeriod | null>(null);
   const [activeSecondaryRegistration, setActiveSecondaryRegistration] = useState<SecondaryRegistrationPeriod | null>(null);
-  const [activeTournament, setActiveTournament] = useState<TournamentPeriod | null>(null);
 
   const registerPlayer = async (player: Player) => {
     if (!activeExam || !user) return;
@@ -144,70 +142,6 @@ export default function CoachDashboard() {
     } catch (error) {
       console.error('Error unregistering player from secondary registration:', error);
       alert('حدث خطأ أثناء إلغاء التسجيل من التسجيل الثانوي');
-    }
-  };
-
-  const registerPlayerTournament = async (player: Player) => {
-    if (!activeTournament || !user) return;
-
-    try {
-      const { error, data } = await supabase
-        .from('tournament_registrations')
-        .insert({
-          tournament_period_id: activeTournament.id,
-          player_id: player.id,
-          coach_id: user.id,
-          player_name: player.full_name,
-          birth_date: player.birth_date || null,
-          last_belt: player.belt || null,
-        })
-        .select('*')
-        .single();
-
-      if (error) throw error;
-
-      alert('تم تسجيل اللاعب في البطولة بنجاح!');
-      setPlayers((prev) =>
-        prev.map((p) =>
-          p.id === player.id ? { ...p, tournamentRegistered: true } : p
-        )
-      );
-      
-      if (data) {
-        setTournamentRegisteredPlayers(prev => [...prev, data]);
-      }
-    } catch (error) {
-      console.error('Error registering player for tournament:', error);
-      alert('حدث خطأ أثناء التسجيل في البطولة');
-    }
-  };
-
-  const unregisterPlayerTournament = async (player: Player) => {
-    if (!activeTournament || !user) return;
-
-    try {
-      const { error } = await supabase
-        .from('tournament_registrations')
-        .delete()
-        .match({
-          tournament_period_id: activeTournament.id,
-          player_id: player.id,
-          coach_id: user.id,
-        });
-
-      if (error) throw error;
-
-      alert('تم إلغاء تسجيل اللاعب من البطولة بنجاح!');
-      setPlayers((prev) =>
-        prev.map((p) =>
-          p.id === player.id ? { ...p, tournamentRegistered: false } : p
-        )
-      );
-      
-      setTournamentRegisteredPlayers(prev => prev.filter(r => r.player_id !== player.id));
-    } catch (error) {
-      console.error('Error unregistering player from tournament:', error);
-      alert('حدث خطأ أثناء إلغاء التسجيل من البطولة');
     }
   };
 
@@ -353,77 +287,6 @@ export default function CoachDashboard() {
     alert(`تم تحميل ملف ${fileName} بنجاح`);
   };
 
-  const downloadTournamentRegisteredPlayers = () => {
-    if (tournamentRegisteredPlayers.length === 0) {
-      alert('لا يوجد لاعبين مسجلين في البطولة للتحميل');
-      return;
-    }
-
-    // تحضير البيانات للتصدير
-    const exportData = tournamentRegisteredPlayers.map((player, index) => {
-      const playerData = players.find(p => p.id === player.player_id);
-      return {
-        'م': index + 1,
-        'اسم اللاعب': player.player_name,
-        'الحزام الأخير': getBeltName(player.last_belt || 'white'),
-        'تاريخ الميلاد': player.birth_date ? formatDate(player.birth_date) : 'غير محدد',
-        'رقم الملف': playerData?.file_number || 'غير محدد',
-        'تاريخ التسجيل': formatDate(player.created_at),
-        'رقم تسجيل اللاعب': player.player_id,
-        'رقم تسجيل المدرب': player.coach_id || user?.id,
-        'فترة البطولة': activeTournament ? `${activeTournament.start_date} إلى ${activeTournament.end_date}` : 'غير محدد'
-      };
-    });
-
-    // إضافة معلومات إضافية
-    const summary = [
-      {},
-      {
-        'م': 'ملخص',
-        'اسم اللاعب': `إجمالي عدد اللاعبين: ${tournamentRegisteredPlayers.length}`,
-        'الحزام الأخير': `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
-        'تاريخ الميلاد': `المؤسسة: ${coach?.organization?.name || 'غير محدد'}`,
-        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'تاريخ التسجيل': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'رقم تسجيل اللاعب': '',
-        'رقم تسجيل المدرب': '',
-        'فترة البطولة': ''
-      },
-      {}
-    ];
-
-    const finalData = [...exportData, ...summary];
-
-    // إنشاء ورقة عمل
-    const ws = XLSX.utils.json_to_sheet(finalData, { skipHeader: false });
-    
-    // ضبط عرض الأعمدة
-    const wscols = [
-      { wch: 5 },  // م
-      { wch: 25 }, // اسم اللاعب
-      { wch: 15 }, // الحزام الأخير
-      { wch: 15 }, // تاريخ الميلاد
-      { wch: 15 }, // رقم الملف
-      { wch: 15 }, // تاريخ التسجيل
-      { wch: 20 }, // رقم تسجيل اللاعب
-      { wch: 20 }, // رقم تسجيل المدرب
-      { wch: 30 }  // فترة البطولة
-    ];
-    ws['!cols'] = wscols;
-
-    // إنشاء مصنف وإضافة الورقة
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين المسجلين في البطولة');
-
-    // توليد اسم الملف
-    const fileName = `لاعبين_مسجلين_بطولة_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    // تحميل الملف
-    XLSX.writeFile(wb, fileName);
-    
-    alert(`تم تحميل ملف ${fileName} بنجاح`);
-  };
-
   useEffect(() => {
     const loadCoachData = async () => {
       if (!user) return;
@@ -467,16 +330,6 @@ export default function CoachDashboard() {
 
         setActiveSecondaryRegistration(activeSecondaryData);
 
-        // جلب فترة البطولة النشطة
-        const { data: activeTournamentData } = await supabase
-          .from('tournament_periods')
-          .select('*')
-          .lte('start_date', today)
-          .gte('end_date', today)
-          .maybeSingle();
-
-        setActiveTournament(activeTournamentData);
-
         // جلب تسجيلات الاختبارات الحالية للمدرب
         if (activeExamData) {
           const { data: registrations } = await supabase
@@ -518,24 +371,6 @@ export default function CoachDashboard() {
           // تحديث حالة تسجيل التسجيل الثانوي للاعبين
           playersList.forEach(player => {
             player.secondaryRegistered = secondaryRegisteredIds.includes(player.id);
-          });
-        }
-
-        // جلب تسجيلات البطولة الحالية للمدرب
-        if (activeTournamentData) {
-          const { data: tournamentRegs } = await supabase
-            .from('tournament_registrations')
-            .select('*')
-            .eq('coach_id', user.id)
-            .eq('tournament_period_id', activeTournamentData.id);
-
-          setTournamentRegisteredPlayers(tournamentRegs || []);
-
-          const tournamentRegisteredIds = tournamentRegs?.map(r => r.player_id) || [];
-
-          // تحديث حالة تسجيل البطولة للاعبين
-          playersList.forEach(player => {
-            player.tournamentRegistered = tournamentRegisteredIds.includes(player.id);
           });
         }
 
@@ -784,81 +619,6 @@ export default function CoachDashboard() {
           </div>
         )}
 
-        {/* قسم اللاعبين المسجلين في البطولة */}
-        {activeTournament && tournamentRegisteredPlayers.length > 0 && (
-          <div className="mb-6 bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-purple-800 flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                اللاعبين المسجلين في البطولة
-              </h3>
-              <div className="flex items-center gap-4">
-                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                  {tournamentRegisteredPlayers.length} لاعب
-                </span>
-                <button
-                  onClick={downloadTournamentRegisteredPlayers}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
-                >
-                  <Download className="w-4 h-4" />
-                  تحميل قائمة اللاعبين
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700">اسم اللاعب</th>
-                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700">الحزام الأخير</th>
-                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700">تاريخ الميلاد</th>
-                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700">تاريخ التسجيل</th>
-                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700">الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {tournamentRegisteredPlayers.map((reg) => (
-                    <tr key={reg.id} className="hover:bg-gray-50">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                            <UserCircle className="w-5 h-5 text-purple-600" />
-                          </div>
-                          <span className="font-medium text-gray-900">{reg.player_name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getBeltColor(reg.last_belt || 'white')}`}>
-                          {getBeltName(reg.last_belt || 'white')}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">
-                        {reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد'}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">
-                        {formatDate(reg.created_at)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <button
-                          onClick={() => {
-                            const player = players.find(p => p.id === reg.player_id);
-                            if (player) unregisterPlayerTournament(player);
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-sm rounded-lg transition"
-                        >
-                          <XCircle className="w-4 h-4" />
-                          إلغاء التسجيل
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
         {/* قسم جميع اللاعبين */}
         <div className="bg-white rounded-xl shadow-sm border">
           <div className="p-6 border-b">
@@ -883,14 +643,6 @@ export default function CoachDashboard() {
                     <p className="text-orange-700 font-medium">فترة تسجيل ثانوي نشطة</p>
                     <p className="text-sm text-orange-600">
                       {activeSecondaryRegistration.start_date} إلى {activeSecondaryRegistration.end_date}
-                    </p>
-                  </div>
-                )}
-                {activeTournament && (
-                  <div className="bg-purple-50 px-4 py-2 rounded-lg">
-                    <p className="text-purple-700 font-medium">بطولة نشطة</p>
-                    <p className="text-sm text-purple-600">
-                      {activeTournament.start_date} إلى {activeTournament.end_date}
                     </p>
                   </div>
                 )}
@@ -951,12 +703,6 @@ export default function CoachDashboard() {
                           <span className="flex items-center gap-1 bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium shadow-sm">
                             <BookOpen className="w-3 h-3" />
                             مسجل ثانوي
-                          </span>
-                        )}
-                        {player.tournamentRegistered && (
-                          <span className="flex items-center gap-1 bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium shadow-sm">
-                            <Trophy className="w-3 h-3" />
-                            مسجل بطولة
                           </span>
                         )}
                       </div>
@@ -1020,27 +766,6 @@ export default function CoachDashboard() {
                                 className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                               >
                                 إلغاء التسجيل الثانوي
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* زر تسجيل البطولة */}
-                        {activeTournament && (
-                          <div className="flex gap-2">
-                            {!player.tournamentRegistered ? (
-                              <button
-                                onClick={() => registerPlayerTournament(player)}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                              >
-                                تسجيل في البطولة
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => unregisterPlayerTournament(player)}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                              >
-                                إلغاء التسجيل من البطولة
                               </button>
                             )}
                           </div>
