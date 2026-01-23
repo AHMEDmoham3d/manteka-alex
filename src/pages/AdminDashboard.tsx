@@ -917,26 +917,27 @@ function OrganizationsTable({
   onEdit: (id: string) => void;
 }) {
   return (
-    <div className="block space-y-4">
-      {organizations.map((org) => (
-        <div key={org.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <h3 className="font-semibold text-gray-900">{org.name}</h3>
-              <p className="text-sm text-gray-600">
-                {org.type === 'club' ? 'نادي' : 'مركز شباب'}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => onEdit(org.id)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onDelete(org.id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+    <>
+      <div className="block space-y-4">
+        {organizations.map((org) => (
+          <div key={org.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900">{org.name}</h3>
+                <p className="text-sm text-gray-600">
+                  {org.type === 'club' ? 'نادي' : 'مركز شباب'}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onEdit(org.id)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(org.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -944,7 +945,43 @@ function OrganizationsTable({
             </div>
           </div>
         ))}
-    </div>
+      </div>
+      <table className="hidden lg:block w-full">
+        <thead>
+          <tr className="border-b bg-gray-50">
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">النوع</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {organizations.map((org) => (
+            <tr key={org.id} className="border-b hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm text-gray-900">{org.name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {org.type === 'club' ? 'نادي' : 'مركز شباب'}
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(org.id)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(org.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -959,7 +996,7 @@ function CoachesTable({
 }) {
   return (
     <>
-      <div className="block lg:hidden space-y-4">
+      <div className="block md:hidden space-y-4">
         {coaches.map((coach) => (
           <div key={coach.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">
@@ -990,7 +1027,7 @@ function CoachesTable({
           </div>
         ))}
       </div>
-      <table className="hidden lg:block w-full">
+      <table className="hidden md:block w-full">
         <thead>
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
@@ -1049,36 +1086,32 @@ function PlayersTable({
   };
 
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b bg-gray-50">
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">رقم الملف</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      <div className="block md:hidden space-y-4">
         {players.map((player) => (
-          <tr key={player.id} className="border-b hover:bg-gray-50">
-            <td className="px-6 py-4 text-sm text-gray-900">{player.full_name}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">{player.coach?.full_name}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">
-              {player.belt === 'white' ? 'أبيض' : 
-               player.belt === 'yellow' ? 'أصفر' :
-               player.belt === 'orange' ? 'برتقالي' :
-               player.belt === 'green' ? 'أخضر' :
-               player.belt === 'blue' ? 'أزرق' :
-               player.belt === 'brown' ? 'بني' :
-               player.belt === 'black' ? 'أسود' : player.belt}
-            </td>
-            <td className="px-6 py-4 text-sm text-gray-600">
-              {player.birth_date ? formatDate(player.birth_date) : '-'}
-            </td>
-            <td className="px-6 py-4 text-sm text-gray-900">{player.file_number}</td>
-            <td className="px-6 py-4">
+          <div key={player.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900">{player.full_name}</h3>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">المدرب:</span> {player.coach?.full_name}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">الحزام:</span> {player.belt === 'white' ? 'أبيض' :
+                   player.belt === 'yellow' ? 'أصفر' :
+                   player.belt === 'orange' ? 'برتقالي' :
+                   player.belt === 'green' ? 'أخضر' :
+                   player.belt === 'blue' ? 'أزرق' :
+                   player.belt === 'brown' ? 'بني' :
+                   player.belt === 'black' ? 'أسود' : player.belt}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">تاريخ الميلاد:</span> {player.birth_date ? formatDate(player.birth_date) : 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">رقم الملف:</span> {player.file_number}
+                </p>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => onEdit(player.id)}
@@ -1093,11 +1126,60 @@ function PlayersTable({
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            </td>
-          </tr>
+            </div>
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+      <table className="hidden md:block w-full">
+        <thead>
+          <tr className="border-b bg-gray-50">
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">رقم الملف</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {players.map((player) => (
+            <tr key={player.id} className="border-b hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm text-gray-900">{player.full_name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">{player.coach?.full_name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {player.belt === 'white' ? 'أبيض' :
+                 player.belt === 'yellow' ? 'أصفر' :
+                 player.belt === 'orange' ? 'برتقالي' :
+                 player.belt === 'green' ? 'أخضر' :
+                 player.belt === 'blue' ? 'أزرق' :
+                 player.belt === 'brown' ? 'بني' :
+                 player.belt === 'black' ? 'أسود' : player.belt}
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {player.birth_date ? formatDate(player.birth_date) : '-'}
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-900">{player.file_number}</td>
+              <td className="px-6 py-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(player.id)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(player.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -1118,7 +1200,7 @@ function ExamPeriodsTable({
 
   return (
     <>
-      <div className="block lg:hidden space-y-4">
+      <div className="block md:hidden space-y-4">
         {examPeriods.map((period) => (
           <div key={period.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">
@@ -1149,7 +1231,7 @@ function ExamPeriodsTable({
           </div>
         ))}
       </div>
-      <table className="hidden lg:block w-full">
+      <table className="hidden md:block w-full">
         <thead>
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
@@ -1205,7 +1287,7 @@ function SecondaryPeriodsTable({
 
   return (
     <>
-      <div className="block lg:hidden space-y-4">
+      <div className="block md:hidden space-y-4">
         {secondaryPeriods.map((period) => (
           <div key={period.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">
@@ -1236,7 +1318,7 @@ function SecondaryPeriodsTable({
           </div>
         ))}
       </div>
-      <table className="hidden lg:block w-full">
+      <table className="hidden md:block w-full">
         <thead>
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
@@ -1428,7 +1510,7 @@ function RegistrationsTable({
 
   return (
     <>
-      <div className="block lg:hidden space-y-4">
+      <div className="block md:hidden space-y-4">
         {registrations.map((reg) => (
           <div key={reg.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">
@@ -1444,7 +1526,7 @@ function RegistrationsTable({
                   <span className="font-medium">{getPeriodField()}:</span> {getPeriodName(reg)}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">الحزام:</span> 
+                  <span className="font-medium">الحزام:</span>
                   <span className={`mr-2 px-2 py-1 rounded-full text-xs ${getBeltColor(reg.last_belt || 'white')}`}>
                     {getBeltName(reg.last_belt || 'white')}
                   </span>
@@ -1468,7 +1550,7 @@ function RegistrationsTable({
           </div>
         ))}
       </div>
-      <table className="hidden lg:block w-full">
+      <table className="hidden md:block w-full">
         <thead>
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">اسم اللاعب</th>
