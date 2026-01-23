@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Player, Coach } from '../lib/supabase';
-import type { ExamPeriod } from '../lib/supabase';
-import { LogOut, Search, UserCircle, CheckCircle, XCircle, Download, Trophy } from 'lucide-react';
+import type { ExamPeriod, SecondaryRegistrationPeriod } from '../lib/supabase';
+import { LogOut, Search, UserCircle, CheckCircle, XCircle, Download, BookOpen } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function CoachDashboard() {
@@ -11,11 +11,11 @@ export default function CoachDashboard() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [registeredPlayers, setRegisteredPlayers] = useState<any[]>([]);
-  const [tournamentRegisteredPlayers, setTournamentRegisteredPlayers] = useState<any[]>([]);
+  const [secondaryRegisteredPlayers, setSecondaryRegisteredPlayers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeExam, setActiveExam] = useState<ExamPeriod | null>(null);
-  const [activeTournament, setActiveTournament] = useState<any | null>(null);
+  const [activeSecondaryRegistration, setActiveSecondaryRegistration] = useState<SecondaryRegistrationPeriod | null>(null);
 
   const registerPlayer = async (player: Player) => {
     if (!activeExam || !user) return;
@@ -81,14 +81,14 @@ export default function CoachDashboard() {
     }
   };
 
-  const registerPlayerTournament = async (player: Player) => {
-    if (!activeTournament || !user) return;
+  const registerPlayerSecondary = async (player: Player) => {
+    if (!activeSecondaryRegistration || !user) return;
 
     try {
       const { error, data } = await supabase
-        .from('tournament_registrations')
+        .from('secondary_registrations')
         .insert({
-          tournament_period_id: activeTournament.id,
+          secondary_period_id: activeSecondaryRegistration.id,
           player_id: player.id,
           coach_id: user.id,
           player_name: player.full_name,
@@ -100,48 +100,48 @@ export default function CoachDashboard() {
 
       if (error) throw error;
 
-      alert('تم تسجيل اللاعب في البطولة بنجاح!');
+      alert('تم تسجيل اللاعب في التسجيل الثانوي بنجاح!');
       setPlayers((prev) =>
         prev.map((p) =>
-          p.id === player.id ? { ...p, tournamentRegistered: true } : p
+          p.id === player.id ? { ...p, secondaryRegistered: true } : p
         )
       );
       
       if (data) {
-        setTournamentRegisteredPlayers(prev => [...prev, data]);
+        setSecondaryRegisteredPlayers(prev => [...prev, data]);
       }
     } catch (error) {
-      console.error('Error registering player for tournament:', error);
-      alert('حدث خطأ أثناء التسجيل في البطولة');
+      console.error('Error registering player for secondary registration:', error);
+      alert('حدث خطأ أثناء التسجيل في التسجيل الثانوي');
     }
   };
 
-  const unregisterPlayerTournament = async (player: Player) => {
-    if (!activeTournament || !user) return;
+  const unregisterPlayerSecondary = async (player: Player) => {
+    if (!activeSecondaryRegistration || !user) return;
 
     try {
       const { error } = await supabase
-        .from('tournament_registrations')
+        .from('secondary_registrations')
         .delete()
         .match({
-          tournament_period_id: activeTournament.id,
+          secondary_period_id: activeSecondaryRegistration.id,
           player_id: player.id,
           coach_id: user.id,
         });
 
       if (error) throw error;
 
-      alert('تم إلغاء تسجيل اللاعب من البطولة بنجاح!');
+      alert('تم إلغاء تسجيل اللاعب من التسجيل الثانوي بنجاح!');
       setPlayers((prev) =>
         prev.map((p) =>
-          p.id === player.id ? { ...p, tournamentRegistered: false } : p
+          p.id === player.id ? { ...p, secondaryRegistered: false } : p
         )
       );
       
-      setTournamentRegisteredPlayers(prev => prev.filter(r => r.player_id !== player.id));
+      setSecondaryRegisteredPlayers(prev => prev.filter(r => r.player_id !== player.id));
     } catch (error) {
-      console.error('Error unregistering player from tournament:', error);
-      alert('حدث خطأ أثناء إلغاء التسجيل من البطولة');
+      console.error('Error unregistering player from secondary registration:', error);
+      alert('حدث خطأ أثناء إلغاء التسجيل من التسجيل الثانوي');
     }
   };
 
@@ -216,14 +216,14 @@ export default function CoachDashboard() {
     alert(`تم تحميل ملف ${fileName} بنجاح`);
   };
 
-  const downloadTournamentRegisteredPlayers = () => {
-    if (tournamentRegisteredPlayers.length === 0) {
-      alert('لا يوجد لاعبين مسجلين في البطولة للتحميل');
+  const downloadSecondaryRegisteredPlayers = () => {
+    if (secondaryRegisteredPlayers.length === 0) {
+      alert('لا يوجد لاعبين مسجلين في التسجيل الثانوي للتحميل');
       return;
     }
 
     // تحضير البيانات للتصدير
-    const exportData = tournamentRegisteredPlayers.map((player, index) => {
+    const exportData = secondaryRegisteredPlayers.map((player, index) => {
       const playerData = players.find(p => p.id === player.player_id);
       return {
         'م': index + 1,
@@ -234,7 +234,7 @@ export default function CoachDashboard() {
         'تاريخ التسجيل': formatDate(player.created_at),
         'رقم تسجيل اللاعب': player.player_id,
         'رقم تسجيل المدرب': player.coach_id || user?.id,
-        'فترة البطولة': activeTournament ? `${activeTournament.start_date} إلى ${activeTournament.end_date}` : 'غير محدد'
+        'فترة التسجيل الثانوي': activeSecondaryRegistration ? `${activeSecondaryRegistration.start_date} إلى ${activeSecondaryRegistration.end_date}` : 'غير محدد'
       };
     });
 
@@ -243,14 +243,14 @@ export default function CoachDashboard() {
       {},
       {
         'م': 'ملخص',
-        'اسم اللاعب': `إجمالي عدد اللاعبين: ${tournamentRegisteredPlayers.length}`,
+        'اسم اللاعب': `إجمالي عدد اللاعبين: ${secondaryRegisteredPlayers.length}`,
         'الحزام الأخير': `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
         'تاريخ الميلاد': `المؤسسة: ${coach?.organization?.name || 'غير محدد'}`,
         'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
         'تاريخ التسجيل': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'رقم تسجيل اللاعب': '',
         'رقم تسجيل المدرب': '',
-        'فترة البطولة': ''
+        'فترة التسجيل الثانوي': ''
       },
       {}
     ];
@@ -270,16 +270,16 @@ export default function CoachDashboard() {
       { wch: 15 }, // تاريخ التسجيل
       { wch: 20 }, // رقم تسجيل اللاعب
       { wch: 20 }, // رقم تسجيل المدرب
-      { wch: 30 }  // فترة البطولة
+      { wch: 30 }  // فترة التسجيل الثانوي
     ];
     ws['!cols'] = wscols;
 
     // إنشاء مصنف وإضافة الورقة
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين المسجلين في البطولة');
+    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين المسجلين في التسجيل الثانوي');
 
     // توليد اسم الملف
-    const fileName = `لاعبين_مسجلين_بطولة_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `لاعبين_مسجلين_ثانوي_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
     // تحميل الملف
     XLSX.writeFile(wb, fileName);
@@ -320,15 +320,15 @@ export default function CoachDashboard() {
 
         setActiveExam(activeExamData);
 
-        // جلب البطولة النشطة
-        const { data: activeTournamentData } = await supabase
-          .from('tournament_periods')
+        // جلب فترة التسجيل الثانوي النشطة
+        const { data: activeSecondaryData } = await supabase
+          .from('secondary_registration_periods')
           .select('*')
           .lte('start_date', today)
           .gte('end_date', today)
           .maybeSingle();
 
-        setActiveTournament(activeTournamentData);
+        setActiveSecondaryRegistration(activeSecondaryData);
 
         // جلب تسجيلات الاختبارات الحالية للمدرب
         if (activeExamData) {
@@ -356,21 +356,21 @@ export default function CoachDashboard() {
           });
         }
 
-        // جلب تسجيلات البطولات الحالية للمدرب
-        if (activeTournamentData) {
-          const { data: tournamentRegs } = await supabase
-            .from('tournament_registrations')
+        // جلب تسجيلات التسجيل الثانوي الحالية للمدرب
+        if (activeSecondaryData) {
+          const { data: secondaryRegs } = await supabase
+            .from('secondary_registrations')
             .select('*')
             .eq('coach_id', user.id)
-            .eq('tournament_period_id', activeTournamentData.id);
+            .eq('secondary_period_id', activeSecondaryData.id);
 
-          setTournamentRegisteredPlayers(tournamentRegs || []);
+          setSecondaryRegisteredPlayers(secondaryRegs || []);
 
-          const tournamentRegisteredIds = tournamentRegs?.map(r => r.player_id) || [];
+          const secondaryRegisteredIds = secondaryRegs?.map(r => r.player_id) || [];
 
-          // تحديث حالة تسجيل البطولة للاعبين
+          // تحديث حالة تسجيل التسجيل الثانوي للاعبين
           playersList.forEach(player => {
-            player.tournamentRegistered = tournamentRegisteredIds.includes(player.id);
+            player.secondaryRegistered = secondaryRegisteredIds.includes(player.id);
           });
         }
 
@@ -544,21 +544,21 @@ export default function CoachDashboard() {
           </div>
         )}
 
-        {/* قسم اللاعبين المسجلين في البطولة */}
-        {activeTournament && tournamentRegisteredPlayers.length > 0 && (
+        {/* قسم اللاعبين المسجلين في التسجيل الثانوي */}
+        {activeSecondaryRegistration && secondaryRegisteredPlayers.length > 0 && (
           <div className="mb-6 bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-purple-800 flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                اللاعبين المسجلين في البطولة الحالية
+              <h3 className="text-lg font-semibold text-orange-800 flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                اللاعبين المسجلين في التسجيل الثانوي
               </h3>
               <div className="flex items-center gap-4">
-                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                  {tournamentRegisteredPlayers.length} لاعب
+                <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                  {secondaryRegisteredPlayers.length} لاعب
                 </span>
                 <button
-                  onClick={downloadTournamentRegisteredPlayers}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
+                  onClick={downloadSecondaryRegisteredPlayers}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition"
                 >
                   <Download className="w-4 h-4" />
                   تحميل قائمة اللاعبين
@@ -578,12 +578,12 @@ export default function CoachDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {tournamentRegisteredPlayers.map((reg) => (
+                  {secondaryRegisteredPlayers.map((reg) => (
                     <tr key={reg.id} className="hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                            <UserCircle className="w-5 h-5 text-purple-600" />
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                            <UserCircle className="w-5 h-5 text-orange-600" />
                           </div>
                           <span className="font-medium text-gray-900">{reg.player_name}</span>
                         </div>
@@ -603,7 +603,7 @@ export default function CoachDashboard() {
                         <button
                           onClick={() => {
                             const player = players.find(p => p.id === reg.player_id);
-                            if (player) unregisterPlayerTournament(player);
+                            if (player) unregisterPlayerSecondary(player);
                           }}
                           className="flex items-center gap-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-sm rounded-lg transition"
                         >
@@ -638,11 +638,11 @@ export default function CoachDashboard() {
                     </p>
                   </div>
                 )}
-                {activeTournament && (
-                  <div className="bg-purple-50 px-4 py-2 rounded-lg">
-                    <p className="text-purple-700 font-medium">بطولة نشطة</p>
-                    <p className="text-sm text-purple-600">
-                      {activeTournament.start_date} إلى {activeTournament.end_date}
+                {activeSecondaryRegistration && (
+                  <div className="bg-orange-50 px-4 py-2 rounded-lg">
+                    <p className="text-orange-700 font-medium">فترة تسجيل ثانوي نشطة</p>
+                    <p className="text-sm text-orange-600">
+                      {activeSecondaryRegistration.start_date} إلى {activeSecondaryRegistration.end_date}
                     </p>
                   </div>
                 )}
@@ -699,10 +699,10 @@ export default function CoachDashboard() {
                             مسجل اختبار
                           </span>
                         )}
-                        {player.tournamentRegistered && (
-                          <span className="flex items-center gap-1 bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium shadow-sm">
-                            <Trophy className="w-3 h-3" />
-                            مسجل بطولة
+                        {player.secondaryRegistered && (
+                          <span className="flex items-center gap-1 bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium shadow-sm">
+                            <BookOpen className="w-3 h-3" />
+                            مسجل ثانوي
                           </span>
                         )}
                       </div>
@@ -750,22 +750,22 @@ export default function CoachDashboard() {
                           </div>
                         )}
 
-                        {/* زر تسجيل البطولة */}
-                        {activeTournament && (
+                        {/* زر تسجيل التسجيل الثانوي */}
+                        {activeSecondaryRegistration && (
                           <div className="flex gap-2">
-                            {!player.tournamentRegistered ? (
+                            {!player.secondaryRegistered ? (
                               <button
-                                onClick={() => registerPlayerTournament(player)}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                onClick={() => registerPlayerSecondary(player)}
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                               >
-                                تسجيل في البطولة
+                                تسجيل ثانوي
                               </button>
                             ) : (
                               <button
-                                onClick={() => unregisterPlayerTournament(player)}
+                                onClick={() => unregisterPlayerSecondary(player)}
                                 className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                               >
-                                إلغاء التسجيل من البطولة
+                                إلغاء التسجيل الثانوي
                               </button>
                             )}
                           </div>
