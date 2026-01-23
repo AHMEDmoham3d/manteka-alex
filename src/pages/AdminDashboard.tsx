@@ -13,7 +13,8 @@ import {
   X,
   Calendar,
   ClipboardList,
-  Download
+  Download,
+  Trophy
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -26,7 +27,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods' | 'exam_registrations';
+type TabType = 'organizations' | 'coaches' | 'players' | 'exam_periods' | 'exam_registrations' | 'tournament_periods' | 'tournament_registrations';
 
 export default function AdminDashboard() {
   const { signOut } = useAuth();
@@ -36,11 +37,15 @@ export default function AdminDashboard() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [examPeriods, setExamPeriods] = useState<ExamPeriod[]>([]);
   const [examRegistrations, setExamRegistrations] = useState<any[]>([]);
+  const [tournamentPeriods, setTournamentPeriods] = useState<any[]>([]);
+  const [tournamentRegistrations, setTournamentRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedExamPeriod, setSelectedExamPeriod] = useState<string>('all');
   const [selectedCoach, setSelectedCoach] = useState<string>('all');
+  const [selectedTournamentPeriod, setSelectedTournamentPeriod] = useState<string>('all');
+  const [selectedTournamentCoach, setSelectedTournamentCoach] = useState<string>('all');
 
   useEffect(() => {
     loadData();
@@ -68,8 +73,16 @@ export default function AdminDashboard() {
           .select('*')
           .order('created_at', { ascending: false });
         setExamPeriods(data || []);
+      } else if (activeTab === 'tournament_periods') {
+        const { data } = await supabase
+          .from('tournament_periods')
+          .select('*')
+          .order('created_at', { ascending: false });
+        setTournamentPeriods(data || []);
       } else if (activeTab === 'exam_registrations') {
         await loadExamRegistrations();
+      } else if (activeTab === 'tournament_registrations') {
+        await loadTournamentRegistrations();
       } else {
         const { data } = await supabase
           .from('players')
@@ -111,6 +124,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadTournamentRegistrations = async (filters?: { tournamentPeriodId?: string, coachId?: string }) => {
+    try {
+      let query = supabase
+        .from('tournament_registrations')
+        .select(`
+          *,
+          tournament_period:tournament_periods(name, start_date, end_date),
+          coach:profiles(full_name),
+          player:players(birth_date, file_number)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filters?.tournamentPeriodId && filters.tournamentPeriodId !== 'all') {
+        query = query.eq('tournament_period_id', filters.tournamentPeriodId);
+      }
+
+      if (filters?.coachId && filters.coachId !== 'all') {
+        query = query.eq('coach_id', filters.coachId);
+      }
+
+      const { data } = await query;
+      setTournamentRegistrations(data || []);
+    } catch (error) {
+      console.error('Error loading tournament registrations:', error);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'exam_registrations') {
       loadExamRegistrations({
@@ -119,6 +159,15 @@ export default function AdminDashboard() {
       });
     }
   }, [selectedExamPeriod, selectedCoach]);
+
+  useEffect(() => {
+    if (activeTab === 'tournament_registrations') {
+      loadTournamentRegistrations({
+        tournamentPeriodId: selectedTournamentPeriod,
+        coachId: selectedTournamentCoach
+      });
+    }
+  }, [selectedTournamentPeriod, selectedTournamentCoach]);
 
   const handleDelete = async (id: string, table: string) => {
     if (!confirm('هل أنت متأكد من الحذف؟')) return;
@@ -163,7 +212,7 @@ export default function AdminDashboard() {
       {
         'م': 'ملخص',
         'اسم اللاعب': `إجمالي عدد التسجيلات: ${examRegistrations.length}`,
-        'الحزام الأخير': `عدد الفترات: ${examPeriods.length}`,
+        'الحزام الأخير': `عدد فترات الاختبار: ${examPeriods.length}`,
         'تاريخ الميلاد': `عدد المدربين: ${coaches.length}`,
         'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
         'المدرب': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
@@ -199,6 +248,77 @@ export default function AdminDashboard() {
     XLSX.utils.book_append_sheet(wb, ws, 'تسجيلات الاختبارات');
 
     const fileName = `تسجيلات_الاختبارات_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    alert(`تم تحميل ملف ${fileName} بنجاح`);
+  };
+
+  const downloadTournamentRegistrations = () => {
+    if (tournamentRegistrations.length === 0) {
+      alert('لا يوجد تسجيلات للتحميل');
+      return;
+    }
+
+    const exportData = tournamentRegistrations.map((reg, index) => {
+      const tournamentPeriod = tournamentPeriods.find(tp => tp.id === reg.tournament_period_id);
+      const coach = coaches.find(c => c.id === reg.coach_id);
+      
+      return {
+        'م': index + 1,
+        'اسم اللاعب': reg.player_name,
+        'الحزام الأخير': getBeltName(reg.last_belt || 'white'),
+        'تاريخ الميلاد': reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد',
+        'رقم الملف': reg.player?.file_number || 'غير محدد',
+        'المدرب': reg.coach?.full_name || 'غير محدد',
+        'المؤسسة': coach?.organization?.name || 'غير محدد',
+        'فترة البطولة': tournamentPeriod?.name || 'غير محدد',
+        'تاريخ التسجيل': formatDate(reg.created_at),
+        'من تاريخ': tournamentPeriod?.start_date ? formatDate(tournamentPeriod.start_date) : 'غير محدد',
+        'إلى تاريخ': tournamentPeriod?.end_date ? formatDate(tournamentPeriod.end_date) : 'غير محدد'
+      };
+    });
+
+    const summary = [
+      {},
+      {
+        'م': 'ملخص',
+        'اسم اللاعب': `إجمالي عدد التسجيلات: ${tournamentRegistrations.length}`,
+        'الحزام الأخير': `عدد فترات البطولات: ${tournamentPeriods.length}`,
+        'تاريخ الميلاد': `عدد المدربين: ${coaches.length}`,
+        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+        'المدرب': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
+        'المؤسسة': '',
+        'فترة البطولة': '',
+        'تاريخ التسجيل': '',
+        'من تاريخ': '',
+        'إلى تاريخ': ''
+      },
+      {}
+    ];
+
+    const finalData = [...exportData, ...summary];
+
+    const ws = XLSX.utils.json_to_sheet(finalData, { skipHeader: false });
+    
+    const wscols = [
+      { wch: 5 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 }
+    ];
+    ws['!cols'] = wscols;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'تسجيلات البطولات');
+
+    const fileName = `تسجيلات_البطولات_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
     
     alert(`تم تحميل ملف ${fileName} بنجاح`);
@@ -309,6 +429,17 @@ export default function AdminDashboard() {
                 <span>فترات الاختبار</span>
               </button>
               <button
+                onClick={() => setActiveTab('tournament_periods')}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition ${
+                  activeTab === 'tournament_periods'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Trophy className="w-5 h-5" />
+                <span>فترات البطولات</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('exam_registrations')}
                 className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition ${
                   activeTab === 'exam_registrations'
@@ -318,6 +449,17 @@ export default function AdminDashboard() {
               >
                 <ClipboardList className="w-5 h-5" />
                 <span>تسجيلات الاختبارات</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('tournament_registrations')}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition ${
+                  activeTab === 'tournament_registrations'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Trophy className="w-5 h-5" />
+                <span>تسجيلات البطولات</span>
               </button>
             </nav>
           </div>
@@ -329,9 +471,11 @@ export default function AdminDashboard() {
                 {activeTab === 'coaches' && 'المدربين'}
                 {activeTab === 'players' && 'اللاعبين'}
                 {activeTab === 'exam_periods' && 'فترات الاختبار'}
+                {activeTab === 'tournament_periods' && 'فترات البطولات'}
                 {activeTab === 'exam_registrations' && 'تسجيلات الاختبارات'}
+                {activeTab === 'tournament_registrations' && 'تسجيلات البطولات'}
               </h2>
-              {activeTab !== 'exam_registrations' && (
+              {activeTab !== 'exam_registrations' && activeTab !== 'tournament_registrations' && (
                 <button
                   onClick={() => {
                     setEditingId(null);
@@ -398,6 +542,59 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {activeTab === 'tournament_registrations' && (
+              <div className="mb-6 bg-purple-50 p-4 rounded-lg">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      تصفية حسب فترة البطولة
+                    </label>
+                    <select
+                      value={selectedTournamentPeriod}
+                      onChange={(e) => setSelectedTournamentPeriod(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      <option value="all">جميع فترات البطولات</option>
+                      {tournamentPeriods.map((period) => (
+                        <option key={period.id} value={period.id}>
+                          {period.name} ({formatDate(period.start_date)} - {formatDate(period.end_date)})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      تصفية حسب المدرب
+                    </label>
+                    <select
+                      value={selectedTournamentCoach}
+                      onChange={(e) => setSelectedTournamentCoach(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      <option value="all">جميع المدربين</option>
+                      {coaches.map((coach) => (
+                        <option key={coach.id} value={coach.id}>
+                          {coach.full_name} ({coach.organization?.name})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      onClick={downloadTournamentRegistrations}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition h-10"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>تحميل التقرير</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-4 text-sm text-purple-700">
+                  عدد التسجيلات: <span className="font-bold">{tournamentRegistrations.length}</span>
+                </div>
+              </div>
+            )}
+
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -444,11 +641,30 @@ export default function AdminDashboard() {
                     }}
                   />
                 )}
+                {activeTab === 'tournament_periods' && (
+                  <TournamentPeriodsTable
+                    tournamentPeriods={tournamentPeriods}
+                    onDelete={(id) => handleDelete(id, 'tournament_periods')}
+                    onEdit={(id) => {
+                      setEditingId(id);
+                      setShowModal(true);
+                    }}
+                  />
+                )}
                 {activeTab === 'exam_registrations' && (
                   <ExamRegistrationsTable
                     registrations={examRegistrations}
                     onDelete={(id) => handleDelete(id, 'exam_registrations')}
                     coaches={coaches}
+                    type="exam"
+                  />
+                )}
+                {activeTab === 'tournament_registrations' && (
+                  <ExamRegistrationsTable
+                    registrations={tournamentRegistrations}
+                    onDelete={(id) => handleDelete(id, 'tournament_registrations')}
+                    coaches={coaches}
+                    type="tournament"
                   />
                 )}
               </div>
@@ -757,14 +973,103 @@ function ExamPeriodsTable({
   );
 }
 
+function TournamentPeriodsTable({
+  tournamentPeriods,
+  onDelete,
+  onEdit,
+}: {
+  tournamentPeriods: any[];
+  onDelete: (id: string) => void;
+  onEdit: (id: string) => void;
+}) {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'غير محدد';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-EG');
+  };
+
+  return (
+    <>
+      <div className="block lg:hidden space-y-4">
+        {tournamentPeriods.map((period) => (
+          <div key={period.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900">{period.name}</h3>
+                <p className="text-sm text-gray-600">
+                  من: {formatDate(period.start_date)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  إلى: {formatDate(period.end_date)}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onEdit(period.id)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(period.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <table className="hidden lg:block w-full">
+        <thead>
+          <tr className="border-b bg-gray-50">
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ البداية</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ النهاية</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tournamentPeriods.map((period) => (
+            <tr key={period.id} className="border-b hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm text-gray-900">{period.name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">{formatDate(period.start_date)}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">{formatDate(period.end_date)}</td>
+              <td className="px-6 py-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(period.id)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(period.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  );
+}
+
 function ExamRegistrationsTable({
   registrations,
   onDelete,
-  coaches
+  coaches,
+  type = 'exam'
 }: {
   registrations: any[];
   onDelete: (id: string) => void;
   coaches: Coach[];
+  type?: 'exam' | 'tournament';
 }) {
   const formatDate = (dateString: string) => {
     if (!dateString) return 'غير محدد';
@@ -803,6 +1108,18 @@ function ExamRegistrationsTable({
     return coach?.organization?.name || 'غير محدد';
   };
 
+  const getPeriodName = (reg: any) => {
+    if (type === 'exam') {
+      return reg.exam_period?.name || 'غير محدد';
+    } else {
+      return reg.tournament_period?.name || 'غير محدد';
+    }
+  };
+
+  const getPeriodField = () => {
+    return type === 'exam' ? 'الاختبار' : 'البطولة';
+  };
+
   return (
     <>
       <div className="block lg:hidden space-y-4">
@@ -818,7 +1135,7 @@ function ExamRegistrationsTable({
                   <span className="font-medium">المؤسسة:</span> {getCoachOrganization(reg.coach_id)}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">الاختبار:</span> {reg.exam_period?.name}
+                  <span className="font-medium">{getPeriodField()}:</span> {getPeriodName(reg)}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">الحزام:</span> 
@@ -853,7 +1170,7 @@ function ExamRegistrationsTable({
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">فترة الاختبار</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">{getPeriodField()}</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ التسجيل</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
           </tr>
@@ -872,7 +1189,7 @@ function ExamRegistrationsTable({
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">{reg.coach?.full_name || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{getCoachOrganization(reg.coach_id)}</td>
-              <td className="px-6 py-4 text-sm text-gray-600">{reg.exam_period?.name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">{getPeriodName(reg)}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{formatDate(reg.created_at)}</td>
               <td className="px-6 py-4">
                 <button
@@ -950,6 +1267,8 @@ function FormModal({
         table = 'players';
       } else if (type === 'exam_periods') {
         table = 'exam_periods';
+      } else if (type === 'tournament_periods') {
+        table = 'tournament_periods';
       }
 
       const { data, error } = await supabase
@@ -961,10 +1280,10 @@ function FormModal({
       if (error) throw error;
 
       if (data) {
-        if (type === 'exam_periods' && data.start_date) {
+        if ((type === 'exam_periods' || type === 'tournament_periods') && data.start_date) {
           data.start_date = new Date(data.start_date).toISOString().split('T')[0];
         }
-        if (type === 'exam_periods' && data.end_date) {
+        if ((type === 'exam_periods' || type === 'tournament_periods') && data.end_date) {
           data.end_date = new Date(data.end_date).toISOString().split('T')[0];
         }
         setFormData(data);
@@ -988,6 +1307,8 @@ function FormModal({
         await savePlayer();
       } else if (type === 'exam_periods') {
         await saveExamPeriod();
+      } else if (type === 'tournament_periods') {
+        await saveTournamentPeriod();
       }
       onSuccess();
     } catch (error: any) {
@@ -1090,12 +1411,32 @@ function FormModal({
     }
   };
 
+  const saveTournamentPeriod = async () => {
+    const data = {
+      name: formData.name,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+    };
+
+    if (editingId) {
+      const { error } = await supabase
+        .from('tournament_periods')
+        .update(data)
+        .eq('id', editingId);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from('tournament_periods').insert([data]);
+      if (error) throw error;
+    }
+  };
+
   const getFormTitle = () => {
     const titles = {
       organizations: 'النوادي والمراكز',
       coaches: 'المدربين',
       players: 'اللاعبين',
       exam_periods: 'فترات الاختبار',
+      tournament_periods: 'فترات البطولات',
     };
     return `${editingId ? 'تعديل' : 'إضافة'} ${titles[type]}`;
   };
@@ -1313,7 +1654,7 @@ function FormModal({
             </>
           )}
 
-          {type === 'exam_periods' && (
+          {(type === 'exam_periods' || type === 'tournament_periods') && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
