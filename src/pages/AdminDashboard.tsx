@@ -92,7 +92,7 @@ export default function AdminDashboard() {
           *,
           exam_period:exam_periods(name, start_date, end_date),
           coach:profiles(full_name),
-          player:players(age, file_number)
+          player:players(birth_date, file_number)
         `)
         .order('created_at', { ascending: false });
 
@@ -147,8 +147,7 @@ export default function AdminDashboard() {
         'م': index + 1,
         'اسم اللاعب': reg.player_name,
         'الحزام الأخير': getBeltName(reg.last_belt || 'white'),
-        'تاريخ الميلاد': reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد',
-        'العمر': reg.player?.age || 'غير محدد',
+        'تاريخ الميلاد': reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد',
         'رقم الملف': reg.player?.file_number || 'غير محدد',
         'المدرب': reg.coach?.full_name || 'غير محدد',
         'المؤسسة': coach?.organization?.name || 'غير محدد',
@@ -166,9 +165,8 @@ export default function AdminDashboard() {
         'اسم اللاعب': `إجمالي عدد التسجيلات: ${examRegistrations.length}`,
         'الحزام الأخير': `عدد الفترات: ${examPeriods.length}`,
         'تاريخ الميلاد': `عدد المدربين: ${coaches.length}`,
-        'العمر': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'المدرب': '',
+        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+        'المدرب': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'المؤسسة': '',
         'فترة الاختبار': '',
         'تاريخ التسجيل': '',
@@ -187,7 +185,6 @@ export default function AdminDashboard() {
       { wch: 25 },
       { wch: 15 },
       { wch: 15 },
-      { wch: 10 },
       { wch: 15 },
       { wch: 20 },
       { wch: 20 },
@@ -614,6 +611,12 @@ function PlayersTable({
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
 }) {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'غير محدد';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-EG');
+  };
+
   return (
     <table className="w-full">
       <thead>
@@ -621,7 +624,7 @@ function PlayersTable({
           <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
           <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
           <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
-          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">العمر</th>
+          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
           <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">رقم الملف</th>
           <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
         </tr>
@@ -640,7 +643,9 @@ function PlayersTable({
                player.belt === 'brown' ? 'بني' :
                player.belt === 'black' ? 'أسود' : player.belt}
             </td>
-            <td className="px-6 py-4 text-sm text-gray-600">{player.age || '-'}</td>
+            <td className="px-6 py-4 text-sm text-gray-600">
+              {player.birth_date ? formatDate(player.birth_date) : '-'}
+            </td>
             <td className="px-6 py-4 text-sm text-gray-900">{player.file_number}</td>
             <td className="px-6 py-4">
               <div className="flex gap-2">
@@ -822,6 +827,9 @@ function ExamRegistrationsTable({
                   </span>
                 </p>
                 <p className="text-sm text-gray-600">
+                  <span className="font-medium">تاريخ الميلاد:</span> {reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
                   <span className="font-medium">التسجيل:</span> {formatDate(reg.created_at)}
                 </p>
               </div>
@@ -842,7 +850,7 @@ function ExamRegistrationsTable({
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">اسم اللاعب</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">العمر</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">فترة الاختبار</th>
@@ -859,7 +867,9 @@ function ExamRegistrationsTable({
                   {getBeltName(reg.last_belt || 'white')}
                 </span>
               </td>
-              <td className="px-6 py-4 text-sm text-gray-600">{reg.player?.age || '-'}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد'}
+              </td>
               <td className="px-6 py-4 text-sm text-gray-600">{reg.coach?.full_name || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{getCoachOrganization(reg.coach_id)}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{reg.exam_period?.name}</td>
@@ -1042,11 +1052,11 @@ function FormModal({
   const savePlayer = async () => {
     const data = {
       full_name: formData.full_name,
-      age: formData.age ? parseInt(formData.age) : null,
       belt: formData.belt,
       coach_id: formData.coach_id,
       organization_id: formData.organization_id,
       file_number: formData.file_number ? parseInt(formData.file_number) : null,
+      birth_date: formData.birth_date || null,
     };
 
     if (editingId) {
@@ -1258,14 +1268,12 @@ function FormModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  العمر
+                  تاريخ الميلاد
                 </label>
                 <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={formData.age || ''}
-                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  type="date"
+                  value={formData.birth_date || ''}
+                  onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
