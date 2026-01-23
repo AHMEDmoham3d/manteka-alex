@@ -590,23 +590,21 @@ export default function CoachDashboard() {
 
         {/* قسم اللاعبين المسجلين في التسجيل الثانوي */}
         {activeSecondaryRegistration && secondaryRegisteredPlayers.length > 0 && (
-          <div className="mb-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl shadow-lg border border-orange-100 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-              <h3 className="text-xl font-bold text-orange-800 flex items-center gap-3">
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-orange-600" />
-                </div>
+          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-orange-600" />
                 اللاعبين المسجلين في التسجيل الثانوي
               </h3>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-                <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+                <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded text-sm font-medium">
                   {secondaryRegisteredPlayers.length} لاعب
                 </span>
                 <button
                   onClick={downloadSecondaryRegisteredPlayers}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition-all duration-200"
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">تحميل قائمة اللاعبين</span>
                   <span className="sm:hidden">تحميل</span>
                 </button>
@@ -615,45 +613,45 @@ export default function CoachDashboard() {
 
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full bg-white rounded-xl shadow-sm overflow-hidden">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <table className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="py-4 px-6 text-right text-sm font-semibold text-gray-700">اسم اللاعب</th>
-                    <th className="py-4 px-6 text-right text-sm font-semibold text-gray-700">الحزام الأخير</th>
-                    <th className="py-4 px-6 text-right text-sm font-semibold text-gray-700">تاريخ الميلاد</th>
-                    <th className="py-4 px-6 text-right text-sm font-semibold text-gray-700">تاريخ التسجيل</th>
-                    <th className="py-4 px-6 text-right text-sm font-semibold text-gray-700">الإجراءات</th>
+                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700 border-b">اسم اللاعب</th>
+                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700 border-b">الحزام الأخير</th>
+                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700 border-b">تاريخ الميلاد</th>
+                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700 border-b">تاريخ التسجيل</th>
+                    <th className="py-3 px-4 text-right text-sm font-medium text-gray-700 border-b">الإجراءات</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-200">
                   {secondaryRegisteredPlayers.map((reg) => (
-                    <tr key={reg.id} className="hover:bg-orange-50 transition-colors duration-200">
-                      <td className="py-4 px-6">
+                    <tr key={reg.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center shadow-sm">
-                            <UserCircle className="w-6 h-6 text-orange-600" />
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                            <UserCircle className="w-5 h-5 text-gray-600" />
                           </div>
-                          <span className="font-semibold text-gray-900">{reg.player_name}</span>
+                          <span className="font-medium text-gray-900">{reg.player_name}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-6">
-                        <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getBeltColor(reg.last_belt || 'white')} shadow-sm`}>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded text-sm font-medium ${getBeltColor(reg.last_belt || 'white')}`}>
                           {getBeltName(reg.last_belt || 'white')}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-gray-600 font-medium">
+                      <td className="py-3 px-4 text-gray-600">
                         {reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد'}
                       </td>
-                      <td className="py-4 px-6 text-gray-600 font-medium">
+                      <td className="py-3 px-4 text-gray-600">
                         {formatDate(reg.created_at)}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-4">
                         <button
                           onClick={() => {
                             const player = players.find(p => p.id === reg.player_id);
                             if (player) unregisterPlayerSecondary(player);
                           }}
-                          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-all duration-200"
                         >
                           <XCircle className="w-4 h-4" />
                           إلغاء التسجيل
