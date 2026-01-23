@@ -438,30 +438,30 @@ export default function CoachDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
-      <header className="bg-white shadow-lg border-b border-gray-200 animate-fade-in">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" dir="rtl">
+      <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 shadow-xl border-b border-white/20 animate-fade-in">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex-1 animate-slide-up">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-4xl font-extrabold text-white mb-3 drop-shadow-lg">
                 لوحة تحكم المدرب
               </h1>
               {coach && (
-                <div className="space-y-1">
-                  <p className="text-gray-600 text-lg">
-                    المدرب: <span className="font-semibold text-gray-900">{coach.full_name}</span>
+                <div className="space-y-2">
+                  <p className="text-blue-100 text-xl">
+                    المدرب: <span className="font-bold text-white">{coach.full_name}</span>
                   </p>
-                  <p className="text-gray-600 text-lg">
-                    المؤسسة: <span className="font-semibold text-gray-900">{coach.organization?.name}</span>
+                  <p className="text-blue-100 text-xl">
+                    المؤسسة: <span className="font-bold text-white">{coach.organization?.name}</span>
                   </p>
                 </div>
               )}
             </div>
             <button
               onClick={() => signOut()}
-              className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg font-semibold animate-slide-in-right"
+              className="flex items-center justify-center gap-3 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl font-bold backdrop-blur-sm border border-white/20 animate-slide-in-right"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-6 h-6" />
               <span className="hidden sm:inline">تسجيل الخروج</span>
               <span className="sm:hidden">خروج</span>
             </button>
@@ -472,21 +472,23 @@ export default function CoachDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* قسم اللاعبين المسجلين في الاختبار */}
         {activeExam && registeredPlayers.length > 0 && (
-          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 animate-scale-in">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="mb-8 bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-2xl border border-green-200/50 p-6 sm:p-8 animate-scale-in hover:shadow-3xl transition-all duration-500">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-6">
+              <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
                 اللاعبين المسجلين في الاختبار الحالي
               </h3>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded text-sm font-medium">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-4 py-2 rounded-full text-sm font-bold shadow-md">
                   {registeredPlayers.length} لاعب
                 </span>
                 <button
                   onClick={downloadRegisteredPlayers}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-all duration-200"
+                  className="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5" />
                   <span className="hidden sm:inline">تحميل قائمة اللاعبين</span>
                   <span className="sm:hidden">تحميل</span>
                 </button>
@@ -546,17 +548,17 @@ export default function CoachDashboard() {
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
-              {registeredPlayers.map((reg) => (
-                <div key={reg.id} className="bg-white rounded-xl p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shadow-sm">
-                        <UserCircle className="w-7 h-7 text-blue-600" />
+            <div className="md:hidden space-y-6">
+              {registeredPlayers.map((reg, index) => (
+                <div key={reg.id} className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-6 shadow-xl border border-green-200/50 hover:shadow-2xl transition-all duration-500 animate-fade-in hover:scale-105" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shadow-lg">
+                        <UserCircle className="w-8 h-8 text-blue-600" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900 text-lg">{reg.player_name}</h4>
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 ${getBeltColor(reg.last_belt || 'white')}`}>
+                        <h4 className="font-bold text-gray-900 text-xl">{reg.player_name}</h4>
+                        <span className={`inline-block px-4 py-2 rounded-full text-sm font-bold mt-2 shadow-md ${getBeltColor(reg.last_belt || 'white')}`}>
                           {getBeltName(reg.last_belt || 'white')}
                         </span>
                       </div>
@@ -566,20 +568,20 @@ export default function CoachDashboard() {
                         const player = players.find(p => p.id === reg.player_id);
                         if (player) unregisterPlayer(player);
                       }}
-                      className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg transition-all duration-300 shadow-sm"
+                      className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
-                      <XCircle className="w-4 h-4" />
+                      <XCircle className="w-5 h-5" />
                       إلغاء
                     </button>
                   </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">تاريخ الميلاد:</span>
-                      <span className="font-medium text-gray-900">{reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد'}</span>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-semibold">تاريخ الميلاد:</span>
+                      <span className="font-bold text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">{reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">تاريخ التسجيل:</span>
-                      <span className="font-medium text-gray-900">{formatDate(reg.created_at)}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-semibold">تاريخ التسجيل:</span>
+                      <span className="font-bold text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">{formatDate(reg.created_at)}</span>
                     </div>
                   </div>
                 </div>
@@ -590,21 +592,23 @@ export default function CoachDashboard() {
 
         {/* قسم اللاعبين المسجلين في التسجيل الثانوي */}
         {activeSecondaryRegistration && secondaryRegisteredPlayers.length > 0 && (
-          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 animate-scale-in">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-orange-600" />
+          <div className="mb-8 bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-2xl border border-orange-200/50 p-6 sm:p-8 animate-scale-in hover:shadow-3xl transition-all duration-500">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-6">
+              <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
                 اللاعبين المسجلين في التسجيل الثانوي
               </h3>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-                <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded text-sm font-medium">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                <span className="bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 px-4 py-2 rounded-full text-sm font-bold shadow-md">
                   {secondaryRegisteredPlayers.length} لاعب
                 </span>
                 <button
                   onClick={downloadSecondaryRegisteredPlayers}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition-all duration-200"
+                  className="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5" />
                   <span className="hidden sm:inline">تحميل قائمة اللاعبين</span>
                   <span className="sm:hidden">تحميل</span>
                 </button>
@@ -664,17 +668,17 @@ export default function CoachDashboard() {
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden space-y-4">
-              {secondaryRegisteredPlayers.map((reg) => (
-                <div key={reg.id} className="bg-white rounded-xl p-4 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center shadow-sm">
-                        <UserCircle className="w-7 h-7 text-orange-600" />
+            <div className="md:hidden space-y-6">
+              {secondaryRegisteredPlayers.map((reg, index) => (
+                <div key={reg.id} className="bg-gradient-to-br from-white to-orange-50 rounded-2xl p-6 shadow-xl border border-orange-200/50 hover:shadow-2xl transition-all duration-500 animate-fade-in hover:scale-105" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center shadow-lg">
+                        <UserCircle className="w-8 h-8 text-orange-600" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900 text-lg">{reg.player_name}</h4>
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 ${getBeltColor(reg.last_belt || 'white')}`}>
+                        <h4 className="font-bold text-gray-900 text-xl">{reg.player_name}</h4>
+                        <span className={`inline-block px-4 py-2 rounded-full text-sm font-bold mt-2 shadow-md ${getBeltColor(reg.last_belt || 'white')}`}>
                           {getBeltName(reg.last_belt || 'white')}
                         </span>
                       </div>
@@ -684,20 +688,20 @@ export default function CoachDashboard() {
                         const player = players.find(p => p.id === reg.player_id);
                         if (player) unregisterPlayerSecondary(player);
                       }}
-                      className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg transition-all duration-300 shadow-sm"
+                      className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
-                      <XCircle className="w-4 h-4" />
+                      <XCircle className="w-5 h-5" />
                       إلغاء
                     </button>
                   </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">تاريخ الميلاد:</span>
-                      <span className="font-medium text-gray-900">{reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد'}</span>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-semibold">تاريخ الميلاد:</span>
+                      <span className="font-bold text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">{reg.birth_date ? formatDate(reg.birth_date) : 'غير محدد'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">تاريخ التسجيل:</span>
-                      <span className="font-medium text-gray-900">{formatDate(reg.created_at)}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-semibold">تاريخ التسجيل:</span>
+                      <span className="font-bold text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">{formatDate(reg.created_at)}</span>
                     </div>
                   </div>
                 </div>
@@ -707,28 +711,28 @@ export default function CoachDashboard() {
         )}
 
         {/* قسم جميع اللاعبين */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden animate-scale-in">
-          <div className="bg-gray-50 border-b border-gray-200 p-6">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="bg-gradient-to-br from-white via-blue-50 to-indigo-50 rounded-3xl shadow-2xl border border-blue-200/50 overflow-hidden animate-scale-in hover:shadow-3xl transition-all duration-500">
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 p-8">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">جميع اللاعبين</h2>
-                <p className="text-gray-600 text-lg">
-                  عدد اللاعبين: <span className="font-semibold text-gray-900">{filteredPlayers.length}</span>
+                <h2 className="text-3xl font-extrabold text-white mb-3 drop-shadow-lg">جميع اللاعبين</h2>
+                <p className="text-blue-100 text-xl">
+                  عدد اللاعبين: <span className="font-bold text-white bg-white/20 px-3 py-1 rounded-full">{filteredPlayers.length}</span>
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
                 {activeExam && (
-                  <div className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg">
-                    <p className="text-blue-800 font-semibold text-sm">فترة اختبار نشطة</p>
-                    <p className="text-blue-600 text-sm">
+                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-4 rounded-xl shadow-lg">
+                    <p className="text-white font-bold text-sm">فترة اختبار نشطة</p>
+                    <p className="text-blue-100 text-sm">
                       {activeExam.start_date} إلى {activeExam.end_date}
                     </p>
                   </div>
                 )}
                 {activeSecondaryRegistration && (
-                  <div className="bg-orange-50 border border-orange-200 px-4 py-3 rounded-lg">
-                    <p className="text-orange-800 font-semibold text-sm">فترة تسجيل ثانوي نشطة</p>
-                    <p className="text-orange-600 text-sm">
+                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-4 rounded-xl shadow-lg">
+                    <p className="text-white font-bold text-sm">فترة تسجيل ثانوي نشطة</p>
+                    <p className="text-blue-100 text-sm">
                       {activeSecondaryRegistration.start_date} إلى {activeSecondaryRegistration.end_date}
                     </p>
                   </div>
@@ -736,14 +740,14 @@ export default function CoachDashboard() {
               </div>
             </div>
 
-            <div className="relative mt-6">
-              <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
+            <div className="relative mt-8">
+              <Search className="absolute right-6 top-1/2 transform -translate-y-1/2 text-blue-200 w-7 h-7" />
               <input
                 type="text"
                 placeholder="ابحث عن لاعب (الاسم، الحزام)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-14 pl-6 py-4 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
+                className="w-full pr-16 pl-8 py-5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-white placeholder-blue-200 focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-300 text-xl font-medium shadow-lg"
               />
             </div>
           </div>
@@ -765,45 +769,46 @@ export default function CoachDashboard() {
                 <p className="text-gray-500 mt-2">ابدأ بإضافة لاعبين جدد للمدرب</p>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                {filteredPlayers.map((player) => (
+              <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                {filteredPlayers.map((player, index) => (
                   <div
                     key={player.id}
-                    className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg border border-gray-200 hover:border-gray-300 transition-all duration-200"
+                    className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-xl hover:shadow-2xl border border-gray-200/50 hover:border-blue-300/50 transition-all duration-500 animate-fade-in hover:scale-105 hover:-translate-y-2"
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                          <UserCircle className="w-7 h-7 text-gray-600" />
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shadow-lg">
+                          <UserCircle className="w-8 h-8 text-blue-600" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-gray-900 text-lg truncate">{player.full_name}</h3>
-                          <p className="text-sm text-gray-600">
-                            رقم الملف: {player.file_number || 'غير محدد'}
+                          <h3 className="font-bold text-gray-900 text-xl truncate mb-1">{player.full_name}</h3>
+                          <p className="text-sm text-gray-600 font-medium">
+                            رقم الملف: <span className="bg-gray-100 px-2 py-1 rounded text-xs">{player.file_number || 'غير محدد'}</span>
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-2">
                         {player.registered && (
-                          <span className="flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                            <CheckCircle className="w-3 h-3" />
+                          <span className="flex items-center gap-2 bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-3 py-2 rounded-full text-xs font-bold shadow-md">
+                            <CheckCircle className="w-4 h-4" />
                             مسجل اختبار
                           </span>
                         )}
                         {player.secondaryRegistered && (
-                          <span className="flex items-center gap-1 bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">
-                            <BookOpen className="w-3 h-3" />
+                          <span className="flex items-center gap-2 bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 px-3 py-2 rounded-full text-xs font-bold shadow-md">
+                            <BookOpen className="w-4 h-4" />
                             مسجل ثانوي
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700">الحزام:</span>
+                        <span className="text-sm font-bold text-gray-700">الحزام:</span>
                         <span
-                          className={`px-3 py-1 rounded text-sm font-medium ${getBeltColor(
+                          className={`px-4 py-2 rounded-full text-sm font-bold shadow-md ${getBeltColor(
                             player.belt || 'white'
                           )}`}
                         >
@@ -813,27 +818,27 @@ export default function CoachDashboard() {
 
                       {player.birth_date && (
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">تاريخ الميلاد:</span>
-                          <span className="text-sm text-gray-900">{formatDate(player.birth_date)}</span>
+                          <span className="text-sm font-bold text-gray-700">تاريخ الميلاد:</span>
+                          <span className="text-sm font-bold text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">{formatDate(player.birth_date)}</span>
                         </div>
                       )}
 
                       {/* أزرار التسجيل */}
-                      <div className="space-y-2 pt-2">
+                      <div className="space-y-3 pt-4">
                         {/* زر تسجيل الاختبار */}
                         {activeExam && (
-                          <div className="flex gap-2">
+                          <div className="flex gap-3">
                             {!player.registered ? (
                               <button
                                 onClick={() => registerPlayer(player)}
-                                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition-all duration-200"
+                                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                               >
                                 تسجيل للاختبار
                               </button>
                             ) : (
                               <button
                                 onClick={() => unregisterPlayer(player)}
-                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-all duration-200"
+                                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                               >
                                 إلغاء التسجيل من الاختبار
                               </button>
@@ -843,18 +848,18 @@ export default function CoachDashboard() {
 
                         {/* زر تسجيل التسجيل الثانوي */}
                         {activeSecondaryRegistration && (
-                          <div className="flex gap-2">
+                          <div className="flex gap-3">
                             {!player.secondaryRegistered ? (
                               <button
                                 onClick={() => registerPlayerSecondary(player)}
-                                className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded transition-all duration-200"
+                                className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                               >
                                 تسجيل ثانوي
                               </button>
                             ) : (
                               <button
                                 onClick={() => unregisterPlayerSecondary(player)}
-                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-all duration-200"
+                                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                               >
                                 إلغاء التسجيل الثانوي
                               </button>
