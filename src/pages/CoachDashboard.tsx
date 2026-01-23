@@ -439,10 +439,10 @@ export default function CoachDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
-      <header className="bg-white shadow-lg border-b border-gray-200">
+      <header className="bg-white shadow-lg border-b border-gray-200 animate-fade-in">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex-1">
+            <div className="flex-1 animate-slide-up">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 لوحة تحكم المدرب
               </h1>
@@ -459,7 +459,7 @@ export default function CoachDashboard() {
             </div>
             <button
               onClick={() => signOut()}
-              className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg font-semibold"
+              className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg font-semibold animate-slide-in-right"
             >
               <LogOut className="w-5 h-5" />
               <span className="hidden sm:inline">تسجيل الخروج</span>
@@ -472,7 +472,7 @@ export default function CoachDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* قسم اللاعبين المسجلين في الاختبار */}
         {activeExam && registeredPlayers.length > 0 && (
-          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 animate-scale-in">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -590,7 +590,7 @@ export default function CoachDashboard() {
 
         {/* قسم اللاعبين المسجلين في التسجيل الثانوي */}
         {activeSecondaryRegistration && secondaryRegisteredPlayers.length > 0 && (
-          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+          <div className="mb-6 bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 animate-scale-in">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-orange-600" />
@@ -707,7 +707,7 @@ export default function CoachDashboard() {
         )}
 
         {/* قسم جميع اللاعبين */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden animate-scale-in">
           <div className="bg-gray-50 border-b border-gray-200 p-6">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div>
