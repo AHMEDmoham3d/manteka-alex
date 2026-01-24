@@ -1313,9 +1313,6 @@ function PlayersTable({
                   <span className="font-medium">رقم الملف:</span> {player.file_number || 'غير محدد'}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">الرقم القومي:</span> {player.الرقم_القومي || 'غير محدد'}
-                </p>
-                <p className="text-sm text-gray-600">
                   <span className="font-medium">الفرع:</span> {player.الفرع || 'غير محدد'}
                 </p>
               </div>
@@ -1345,7 +1342,6 @@ function PlayersTable({
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">رقم الملف</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الرقم القومي</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
           </tr>
         </thead>
@@ -1361,7 +1357,6 @@ function PlayersTable({
                 </span>
               </td>
               <td className="px-6 py-4 text-sm text-gray-900">{player.file_number || '-'}</td>
-              <td className="px-6 py-4 text-sm text-gray-900">{player.الرقم_القومي || '-'}</td>
               <td className="px-6 py-4">
                 <div className="flex gap-2">
                   <button
