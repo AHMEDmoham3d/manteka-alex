@@ -41,6 +41,13 @@ export interface Player {
   created_at: string;
   coach?: Profile;
   registered?: boolean;
+  national_id?: string | null;
+  branch?: string | null;
+  authority?: string | null;
+  gender?: string | null;
+  registration_type?: string | null;
+  season_registration_date?: string | null;
+  registration_date?: string | null;
   الرقم_القومي?: string | null;
   الفرع?: string | null;
   الهيئة?: string | null;
