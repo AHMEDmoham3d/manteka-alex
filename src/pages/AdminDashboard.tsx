@@ -1111,6 +1111,27 @@ function PlayersTable({
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">رقم الملف:</span> {player.file_number}
                 </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">الفرع:</span> {player['الفرع'] || 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">الهيئة:</span> {player['الهيئة'] || 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">النوع:</span> {player['النوع'] || 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">الرقم القومي:</span> {player['الرقم القومي'] || 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">نوع القيد:</span> {player['نوع القيد'] || 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">تاريخ التسجيل للموسم:</span> {player['تاريخ التسجيل للموسم'] ? formatDate(player['تاريخ التسجيل للموسم']) : 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">تاريخه:</span> {player['تاريخه'] || 'غير محدد'}
+                </p>
               </div>
               <div className="flex gap-2">
                 <button
