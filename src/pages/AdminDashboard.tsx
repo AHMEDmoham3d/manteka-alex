@@ -97,10 +97,9 @@ export default function AdminDashboard() {
       } else if (activeTab === 'tournament_registrations') {
         await loadTournamentRegistrations();
       } else {
-        // جلب جميع البيانات الخاصة باللاعبين مع المدرب والمؤسسة
         const { data } = await supabase
           .from('players')
-          .select('*, coach:profiles(*), organization:organizations(*)')
+          .select('*, coach:profiles(*)')
           .order('created_at', { ascending: false });
         setPlayers(data || []);
       }
@@ -119,16 +118,7 @@ export default function AdminDashboard() {
           *,
           exam_period:exam_periods(name, start_date, end_date),
           coach:profiles(full_name),
-          player:players!inner(
-            birth_date, 
-            file_number,
-            الفرع,
-            الهيئة,
-            النوع,
-            الرقم_القومي,
-            نوع_القيد,
-            تاريخ_التسجيل_للموسم
-          )
+          player:players(birth_date, file_number)
         `)
         .order('created_at', { ascending: false });
 
@@ -155,16 +145,7 @@ export default function AdminDashboard() {
           *,
           secondary_period:secondary_registration_periods(name, start_date, end_date),
           coach:profiles(full_name),
-          player:players!inner(
-            birth_date, 
-            file_number,
-            الفرع,
-            الهيئة,
-            النوع,
-            الرقم_القومي,
-            نوع_القيد,
-            تاريخ_التسجيل_للموسم
-          )
+          player:players(birth_date, file_number)
         `)
         .order('created_at', { ascending: false });
 
@@ -191,16 +172,7 @@ export default function AdminDashboard() {
           *,
           tournament_period:tournament_periods(name, start_date, end_date),
           coach:profiles(full_name),
-          player:players!inner(
-            birth_date, 
-            file_number,
-            الفرع,
-            الهيئة,
-            النوع,
-            الرقم_القومي,
-            نوع_القيد,
-            تاريخ_التسجيل_للموسم
-          )
+          player:players(birth_date, file_number)
         `)
         .order('created_at', { ascending: false });
 
@@ -274,13 +246,7 @@ export default function AdminDashboard() {
         'اسم اللاعب': reg.player_name,
         'الحزام الأخير': getBeltName(reg.last_belt || 'white'),
         'تاريخ الميلاد': reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد',
-        'الرقم القومي': reg.player?.الرقم_القومي || 'غير محدد',
         'رقم الملف': reg.player?.file_number || 'غير محدد',
-        'الفرع': reg.player?.الفرع || 'غير محدد',
-        'الهيئة': reg.player?.الهيئة || 'غير محدد',
-        'النوع': reg.player?.النوع || 'غير محدد',
-        'نوع القيد': reg.player?.نوع_القيد || 'غير محدد',
-        'تاريخ التسجيل للموسم': reg.player?.تاريخ_التسجيل_للموسم ? formatDate(reg.player.تاريخ_التسجيل_للموسم) : 'غير محدد',
         'المدرب': reg.coach?.full_name || 'غير محدد',
         'المؤسسة': coach?.organization?.name || 'غير محدد',
         'فترة الاختبار': examPeriod?.name || 'غير محدد',
@@ -297,14 +263,8 @@ export default function AdminDashboard() {
         'اسم اللاعب': `إجمالي عدد التسجيلات: ${examRegistrations.length}`,
         'الحزام الأخير': `عدد فترات الاختبار: ${examPeriods.length}`,
         'تاريخ الميلاد': `عدد المدربين: ${coaches.length}`,
-        'الرقم القومي': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'الفرع': '',
-        'الهيئة': '',
-        'النوع': '',
-        'نوع القيد': '',
-        'تاريخ التسجيل للموسم': '',
-        'المدرب': '',
+        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+        'المدرب': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'المؤسسة': '',
         'فترة الاختبار': '',
         'تاريخ التسجيل': '',
@@ -323,13 +283,7 @@ export default function AdminDashboard() {
       { wch: 25 },
       { wch: 15 },
       { wch: 15 },
-      { wch: 20 },
       { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 20 },
       { wch: 20 },
       { wch: 20 },
       { wch: 20 },
@@ -363,13 +317,7 @@ export default function AdminDashboard() {
         'اسم اللاعب': reg.player_name,
         'الحزام الأخير': getBeltName(reg.last_belt || 'white'),
         'تاريخ الميلاد': reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد',
-        'الرقم القومي': reg.player?.الرقم_القومي || 'غير محدد',
         'رقم الملف': reg.player?.file_number || 'غير محدد',
-        'الفرع': reg.player?.الفرع || 'غير محدد',
-        'الهيئة': reg.player?.الهيئة || 'غير محدد',
-        'النوع': reg.player?.النوع || 'غير محدد',
-        'نوع القيد': reg.player?.نوع_القيد || 'غير محدد',
-        'تاريخ التسجيل للموسم': reg.player?.تاريخ_التسجيل_للموسم ? formatDate(reg.player.تاريخ_التسجيل_للموسم) : 'غير محدد',
         'المدرب': reg.coach?.full_name || 'غير محدد',
         'المؤسسة': coach?.organization?.name || 'غير محدد',
         'فترة التسجيل الثانوي': secondaryPeriod?.name || 'غير محدد',
@@ -386,14 +334,8 @@ export default function AdminDashboard() {
         'اسم اللاعب': `إجمالي عدد التسجيلات: ${secondaryRegistrations.length}`,
         'الحزام الأخير': `عدد فترات التسجيل الثانوي: ${secondaryPeriods.length}`,
         'تاريخ الميلاد': `عدد المدربين: ${coaches.length}`,
-        'الرقم القومي': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'الفرع': '',
-        'الهيئة': '',
-        'النوع': '',
-        'نوع القيد': '',
-        'تاريخ التسجيل للموسم': '',
-        'المدرب': '',
+        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+        'المدرب': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'المؤسسة': '',
         'فترة التسجيل الثانوي': '',
         'تاريخ التسجيل': '',
@@ -412,13 +354,7 @@ export default function AdminDashboard() {
       { wch: 25 },
       { wch: 15 },
       { wch: 15 },
-      { wch: 20 },
       { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 20 },
       { wch: 20 },
       { wch: 20 },
       { wch: 20 },
@@ -452,13 +388,7 @@ export default function AdminDashboard() {
         'اسم اللاعب': reg.player_name,
         'الحزام الأخير': getBeltName(reg.last_belt || 'white'),
         'تاريخ الميلاد': reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد',
-        'الرقم القومي': reg.player?.الرقم_القومي || 'غير محدد',
         'رقم الملف': reg.player?.file_number || 'غير محدد',
-        'الفرع': reg.player?.الفرع || 'غير محدد',
-        'الهيئة': reg.player?.الهيئة || 'غير محدد',
-        'النوع': reg.player?.النوع || 'غير محدد',
-        'نوع القيد': reg.player?.نوع_القيد || 'غير محدد',
-        'تاريخ التسجيل للموسم': reg.player?.تاريخ_التسجيل_للموسم ? formatDate(reg.player.تاريخ_التسجيل_للموسم) : 'غير محدد',
         'المدرب': reg.coach?.full_name || 'غير محدد',
         'المؤسسة': coach?.organization?.name || 'غير محدد',
         'فترة البطولة': tournamentPeriod?.name || 'غير محدد',
@@ -475,14 +405,8 @@ export default function AdminDashboard() {
         'اسم اللاعب': `إجمالي عدد التسجيلات: ${tournamentRegistrations.length}`,
         'الحزام الأخير': `عدد فترات البطولات: ${tournamentPeriods.length}`,
         'تاريخ الميلاد': `عدد المدربين: ${coaches.length}`,
-        'الرقم القومي': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'الفرع': '',
-        'الهيئة': '',
-        'النوع': '',
-        'نوع القيد': '',
-        'تاريخ التسجيل للموسم': '',
-        'المدرب': '',
+        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+        'المدرب': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'المؤسسة': '',
         'فترة البطولة': '',
         'تاريخ التسجيل': '',
@@ -501,13 +425,7 @@ export default function AdminDashboard() {
       { wch: 25 },
       { wch: 15 },
       { wch: 15 },
-      { wch: 20 },
       { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 20 },
       { wch: 20 },
       { wch: 20 },
       { wch: 20 },
@@ -521,86 +439,6 @@ export default function AdminDashboard() {
     XLSX.utils.book_append_sheet(wb, ws, 'تسجيلات البطولات');
 
     const fileName = `تسجيلات_البطولات_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-    
-    alert(`تم تحميل ملف ${fileName} بنجاح`);
-  };
-
-  const downloadPlayersReport = () => {
-    if (players.length === 0) {
-      alert('لا يوجد لاعبين للتحميل');
-      return;
-    }
-
-    const exportData = players.map((player, index) => {
-      return {
-        'م': index + 1,
-        'اسم اللاعب': player.full_name,
-        'الحزام': getBeltName(player.belt || 'white'),
-        'تاريخ الميلاد': player.birth_date ? formatDate(player.birth_date) : 'غير محدد',
-        'الرقم القومي': player.الرقم_القومي || 'غير محدد',
-        'رقم الملف': player.file_number || 'غير محدد',
-        'الفرع': player.الفرع || 'غير محدد',
-        'الهيئة': player.الهيئة || 'غير محدد',
-        'النوع': player.النوع || 'غير محدد',
-        'نوع القيد': player.نوع_القيد || 'غير محدد',
-        'تاريخ التسجيل للموسم': player.تاريخ_التسجيل_للموسم ? formatDate(player.تاريخ_التسجيل_للموسم) : 'غير محدد',
-        'تاريخه': player.تاريخه || 'غير محدد',
-        'المدرب': player.coach?.full_name || 'غير محدد',
-        'المؤسسة': player.organization?.name || 'غير محدد',
-        'تاريخ الإضافة': player.created_at ? formatDate(player.created_at) : 'غير محدد'
-      };
-    });
-
-    const summary = [
-      {},
-      {
-        'م': 'ملخص',
-        'اسم اللاعب': `إجمالي عدد اللاعبين: ${players.length}`,
-        'الحزام': `عدد المدربين: ${coaches.length}`,
-        'تاريخ الميلاد': `عدد المؤسسات: ${organizations.length}`,
-        'الرقم القومي': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'الفرع': '',
-        'الهيئة': '',
-        'النوع': '',
-        'نوع القيد': '',
-        'تاريخ التسجيل للموسم': '',
-        'تاريخه': '',
-        'المدرب': '',
-        'المؤسسة': '',
-        'تاريخ الإضافة': ''
-      },
-      {}
-    ];
-
-    const finalData = [...exportData, ...summary];
-
-    const ws = XLSX.utils.json_to_sheet(finalData, { skipHeader: false });
-    
-    const wscols = [
-      { wch: 5 },
-      { wch: 25 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 15 }
-    ];
-    ws['!cols'] = wscols;
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين');
-
-    const fileName = `تقرير_اللاعبين_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
     
     alert(`تم تحميل ملف ${fileName} بنجاح`);
@@ -781,29 +619,18 @@ export default function AdminDashboard() {
                 {activeTab === 'secondary_registrations' && 'تسجيلات التسجيل الثانوي'}
                 {activeTab === 'tournament_registrations' && 'تسجيلات البطولات'}
               </h2>
-              <div className="flex flex-wrap gap-2">
-                {activeTab === 'players' && (
-                  <button
-                    onClick={downloadPlayersReport}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>تحميل التقرير</span>
-                  </button>
-                )}
-                {activeTab !== 'exam_registrations' && activeTab !== 'secondary_registrations' && activeTab !== 'tournament_registrations' && (
-                  <button
-                    onClick={() => {
-                      setEditingId(null);
-                      setShowModal(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>إضافة جديد</span>
-                  </button>
-                )}
-              </div>
+              {activeTab !== 'exam_registrations' && activeTab !== 'secondary_registrations' && activeTab !== 'tournament_registrations' && (
+                <button
+                  onClick={() => {
+                    setEditingId(null);
+                    setShowModal(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition w-full sm:w-auto"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>إضافة جديد</span>
+                </button>
+              )}
             </div>
 
             {activeTab === 'exam_registrations' && (
@@ -1258,32 +1085,6 @@ function PlayersTable({
     return date.toLocaleDateString('ar-EG');
   };
 
-  const getBeltName = (belt: string) => {
-    const names: Record<string, string> = {
-      white: 'أبيض',
-      yellow: 'أصفر',
-      orange: 'برتقالي',
-      green: 'أخضر',
-      blue: 'أزرق',
-      brown: 'بني',
-      black: 'أسود',
-    };
-    return names[belt] || belt;
-  };
-
-  const getBeltColor = (belt: string) => {
-    const colors: Record<string, string> = {
-      white: 'bg-gray-200 text-gray-800',
-      yellow: 'bg-yellow-200 text-yellow-800',
-      orange: 'bg-orange-200 text-orange-800',
-      green: 'bg-green-200 text-green-800',
-      blue: 'bg-blue-200 text-blue-800',
-      brown: 'bg-amber-700 text-white',
-      black: 'bg-gray-900 text-white',
-    };
-    return colors[belt] || 'bg-gray-200 text-gray-800';
-  };
-
   return (
     <>
       <div className="block md:hidden space-y-4">
@@ -1293,28 +1094,22 @@ function PlayersTable({
               <div>
                 <h3 className="font-semibold text-gray-900">{player.full_name}</h3>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">المدرب:</span> {player.coach?.full_name || 'غير محدد'}
+                  <span className="font-medium">المدرب:</span> {player.coach?.full_name}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">المؤسسة:</span> {player.organization?.name || 'غير محدد'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">الحزام:</span>
-                  <span className={`mr-2 px-2 py-1 rounded-full text-xs ${getBeltColor(player.belt || 'white')}`}>
-                    {getBeltName(player.belt || 'white')}
-                  </span>
+                  <span className="font-medium">الحزام:</span> {player.belt === 'white' ? 'أبيض' :
+                   player.belt === 'yellow' ? 'أصفر' :
+                   player.belt === 'orange' ? 'برتقالي' :
+                   player.belt === 'green' ? 'أخضر' :
+                   player.belt === 'blue' ? 'أزرق' :
+                   player.belt === 'brown' ? 'بني' :
+                   player.belt === 'black' ? 'أسود' : player.belt}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">تاريخ الميلاد:</span> {player.birth_date ? formatDate(player.birth_date) : 'غير محدد'}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">رقم الملف:</span> {player.file_number || 'غير محدد'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">الرقم القومي:</span> {player.الرقم_القومي || 'غير محدد'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">الفرع:</span> {player.الفرع || 'غير محدد'}
+                  <span className="font-medium">رقم الملف:</span> {player.file_number}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -1340,10 +1135,9 @@ function PlayersTable({
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الاسم</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">رقم الملف</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الرقم القومي</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الإجراءات</th>
           </tr>
         </thead>
@@ -1351,15 +1145,20 @@ function PlayersTable({
           {players.map((player) => (
             <tr key={player.id} className="border-b hover:bg-gray-50">
               <td className="px-6 py-4 text-sm text-gray-900">{player.full_name}</td>
-              <td className="px-6 py-4 text-sm text-gray-600">{player.coach?.full_name || 'غير محدد'}</td>
-              <td className="px-6 py-4 text-sm text-gray-600">{player.organization?.name || 'غير محدد'}</td>
-              <td className="px-6 py-4 text-sm">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getBeltColor(player.belt || 'white')}`}>
-                  {getBeltName(player.belt || 'white')}
-                </span>
+              <td className="px-6 py-4 text-sm text-gray-600">{player.coach?.full_name}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {player.belt === 'white' ? 'أبيض' :
+                 player.belt === 'yellow' ? 'أصفر' :
+                 player.belt === 'orange' ? 'برتقالي' :
+                 player.belt === 'green' ? 'أخضر' :
+                 player.belt === 'blue' ? 'أزرق' :
+                 player.belt === 'brown' ? 'بني' :
+                 player.belt === 'black' ? 'أسود' : player.belt}
               </td>
-              <td className="px-6 py-4 text-sm text-gray-900">{player.file_number || '-'}</td>
-              <td className="px-6 py-4 text-sm text-gray-900">{player.الرقم_القومي || '-'}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {player.birth_date ? formatDate(player.birth_date) : '-'}
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-900">{player.file_number}</td>
               <td className="px-6 py-4">
                 <div className="flex gap-2">
                   <button
@@ -1733,12 +1532,6 @@ function RegistrationsTable({
                   </span>
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">الرقم القومي:</span> {reg.player?.الرقم_القومي || 'غير محدد'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">الفرع:</span> {reg.player?.الفرع || 'غير محدد'}
-                </p>
-                <p className="text-sm text-gray-600">
                   <span className="font-medium">تاريخ الميلاد:</span> {reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد'}
                 </p>
                 <p className="text-sm text-gray-600">
@@ -1762,8 +1555,7 @@ function RegistrationsTable({
           <tr className="border-b bg-gray-50">
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">اسم اللاعب</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الرقم القومي</th>
-            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الفرع</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ الميلاد</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">{getPeriodField()}</th>
@@ -1781,10 +1573,7 @@ function RegistrationsTable({
                 </span>
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">
-                {reg.player?.الرقم_القومي || 'غير محدد'}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-600">
-                {reg.player?.الفرع || 'غير محدد'}
+                {reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد'}
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">{reg.coach?.full_name || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{getCoachOrganization(reg.coach_id)}</td>
@@ -1887,13 +1676,6 @@ function FormModal({
         if ((type === 'exam_periods' || type === 'secondary_periods' || type === 'tournament_periods') && data.end_date) {
           data.end_date = new Date(data.end_date).toISOString().split('T')[0];
         }
-        // تحويل تاريخ الميلاد والتسجيل للموسم إلى تنسيق input date
-        if (type === 'players' && data.birth_date) {
-          data.birth_date = new Date(data.birth_date).toISOString().split('T')[0];
-        }
-        if (type === 'players' && data.تاريخ_التسجيل_للموسم) {
-          data.تاريخ_التسجيل_للموسم = new Date(data.تاريخ_التسجيل_للموسم).toISOString().split('T')[0];
-        }
         setFormData(data);
       }
     } catch (error) {
@@ -1988,13 +1770,6 @@ function FormModal({
       organization_id: formData.organization_id,
       file_number: formData.file_number ? parseInt(formData.file_number) : null,
       birth_date: formData.birth_date || null,
-      الفرع: formData.الفرع || null,
-      الهيئة: formData.الهيئة || null,
-      النوع: formData.النوع || null,
-      الرقم_القومي: formData.الرقم_القومي || null,
-      نوع_القيد: formData.نوع_القيد || null,
-      تاريخ_التسجيل_للموسم: formData.تاريخ_التسجيل_للموسم || null,
-      تاريخه: formData.تاريخه || null,
     };
 
     if (editingId) {
@@ -2080,7 +1855,7 @@ function FormModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
             {getFormTitle()}
@@ -2197,174 +1972,96 @@ function FormModal({
 
           {type === 'players' && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الاسم الكامل *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.full_name || ''}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    المدرب *
-                  </label>
-                  <select
-                    required
-                    value={formData.coach_id || ''}
-                    onChange={(e) => setFormData({ ...formData, coach_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">اختر المدرب</option>
-                    {coaches.map((coach) => (
-                      <option key={coach.id} value={coach.id}>
-                        {coach.full_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    المؤسسة
-                  </label>
-                  <select
-                    value={formData.organization_id || ''}
-                    onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">اختر المؤسسة (اختياري)</option>
-                    {organizations.map((org) => (
-                      <option key={org.id} value={org.id}>
-                        {org.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ الميلاد
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.birth_date || ''}
-                    onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الحزام
-                  </label>
-                  <select
-                    value={formData.belt || 'white'}
-                    onChange={(e) => setFormData({ ...formData, belt: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="white">أبيض</option>
-                    <option value="yellow">أصفر</option>
-                    <option value="orange">برتقالي</option>
-                    <option value="green">أخضر</option>
-                    <option value="blue">أزرق</option>
-                    <option value="brown">بني</option>
-                    <option value="black">أسود</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم الملف
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.file_number || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, file_number: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الرقم القومي
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.الرقم_القومي || ''}
-                    onChange={(e) => setFormData({ ...formData, الرقم_القومي: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الفرع
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.الفرع || ''}
-                    onChange={(e) => setFormData({ ...formData, الفرع: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الهيئة
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.الهيئة || ''}
-                    onChange={(e) => setFormData({ ...formData, الهيئة: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    النوع
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.النوع || ''}
-                    onChange={(e) => setFormData({ ...formData, النوع: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    نوع القيد
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.نوع_القيد || ''}
-                    onChange={(e) => setFormData({ ...formData, نوع_القيد: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ التسجيل للموسم
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.تاريخ_التسجيل_للموسم || ''}
-                    onChange={(e) => setFormData({ ...formData, تاريخ_التسجيل_للموسم: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخه
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.تاريخه || ''}
-                    onChange={(e) => setFormData({ ...formData, تاريخه: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الاسم الكامل
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.full_name || ''}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  المدرب
+                </label>
+                <select
+                  required
+                  value={formData.coach_id || ''}
+                  onChange={(e) => setFormData({ ...formData, coach_id: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">اختر المدرب</option>
+                  {coaches.map((coach) => (
+                    <option key={coach.id} value={coach.id}>
+                      {coach.full_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  المؤسسة
+                </label>
+                <select
+                  value={formData.organization_id || ''}
+                  onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">اختر المؤسسة (اختياري)</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  تاريخ الميلاد
+                </label>
+                <input
+                  type="date"
+                  value={formData.birth_date || ''}
+                  onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الحزام
+                </label>
+                <select
+                  required
+                  value={formData.belt || 'white'}
+                  onChange={(e) => setFormData({ ...formData, belt: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="white">أبيض</option>
+                  <option value="yellow">أصفر</option>
+                  <option value="orange">برتقالي</option>
+                  <option value="green">أخضر</option>
+                  <option value="blue">أزرق</option>
+                  <option value="brown">بني</option>
+                  <option value="black">أسود</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  رقم الملف
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.file_number || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, file_number: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </>
           )}
@@ -2373,7 +2070,7 @@ function FormModal({
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  اسم الفترة *
+                  اسم الفترة
                 </label>
                 <input
                   type="text"
@@ -2383,31 +2080,29 @@ function FormModal({
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ البداية *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.start_date || ''}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    تاريخ النهاية *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.end_date || ''}
-                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  تاريخ البداية
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={formData.start_date || ''}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  تاريخ النهاية
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={formData.end_date || ''}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </>
           )}
