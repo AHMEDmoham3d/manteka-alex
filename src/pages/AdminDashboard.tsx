@@ -782,6 +782,7 @@ export default function AdminDashboard() {
                   secondary_registrations: 'تسجيلات التسجيل الثانوي',
                   tournament_registrations: 'تسجيلات البطولات'
                 }[activeTab]}
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {activeTab === 'players' && (
                   <button
