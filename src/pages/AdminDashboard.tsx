@@ -125,6 +125,7 @@ export default function AdminDashboard() {
             branch,
             authority,
             national_id,
+            player_type,
             registration_type,
             season_registration_date,
             registration_date
@@ -161,6 +162,7 @@ export default function AdminDashboard() {
             branch,
             authority,
             national_id,
+            player_type,
             registration_type,
             season_registration_date,
             registration_date
@@ -197,6 +199,7 @@ export default function AdminDashboard() {
             branch,
             authority,
             national_id,
+            player_type,
             registration_type,
             season_registration_date,
             registration_date
@@ -278,6 +281,7 @@ export default function AdminDashboard() {
         'رقم الملف': reg.player?.file_number || 'غير محدد',
         'الفرع': reg.player?.branch || 'غير محدد',
         'الهيئة': reg.player?.authority || 'غير محدد',
+        'النوع': getPlayerTypeName(reg.player?.player_type || ''),
         'نوع القيد': reg.player?.registration_type || 'غير محدد',
         'تاريخ التسجيل للموسم': reg.player?.season_registration_date ? formatDate(reg.player.season_registration_date) : 'غير محدد',
         'تاريخه': reg.player?.registration_date || 'غير محدد',
@@ -301,6 +305,7 @@ export default function AdminDashboard() {
         'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'الفرع': '',
         'الهيئة': '',
+        'النوع': '',
         'نوع القيد': '',
         'تاريخ التسجيل للموسم': '',
         'تاريخه': '',
@@ -324,6 +329,7 @@ export default function AdminDashboard() {
       { wch: 15 },
       { wch: 15 },
       { wch: 20 },
+      { wch: 15 },
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
@@ -367,6 +373,7 @@ export default function AdminDashboard() {
         'رقم الملف': reg.player?.file_number || 'غير محدد',
         'الفرع': reg.player?.branch || 'غير محدد',
         'الهيئة': reg.player?.authority || 'غير محدد',
+        'النوع': getPlayerTypeName(reg.player?.player_type || ''),
         'نوع القيد': reg.player?.registration_type || 'غير محدد',
         'تاريخ التسجيل للموسم': reg.player?.season_registration_date ? formatDate(reg.player.season_registration_date) : 'غير محدد',
         'تاريخه': reg.player?.registration_date || 'غير محدد',
@@ -390,6 +397,7 @@ export default function AdminDashboard() {
         'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'الفرع': '',
         'الهيئة': '',
+        'النوع': '',
         'نوع القيد': '',
         'تاريخ التسجيل للموسم': '',
         'تاريخه': '',
@@ -413,6 +421,7 @@ export default function AdminDashboard() {
       { wch: 15 },
       { wch: 15 },
       { wch: 20 },
+      { wch: 15 },
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
@@ -456,6 +465,7 @@ export default function AdminDashboard() {
         'رقم الملف': reg.player?.file_number || 'غير محدد',
         'الفرع': reg.player?.branch || 'غير محدد',
         'الهيئة': reg.player?.authority || 'غير محدد',
+        'النوع': getPlayerTypeName(reg.player?.player_type || ''),
         'نوع القيد': reg.player?.registration_type || 'غير محدد',
         'تاريخ التسجيل للموسم': reg.player?.season_registration_date ? formatDate(reg.player.season_registration_date) : 'غير محدد',
         'تاريخه': reg.player?.registration_date || 'غير محدد',
@@ -479,6 +489,7 @@ export default function AdminDashboard() {
         'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'الفرع': '',
         'الهيئة': '',
+        'النوع': '',
         'نوع القيد': '',
         'تاريخ التسجيل للموسم': '',
         'تاريخه': '',
@@ -502,6 +513,7 @@ export default function AdminDashboard() {
       { wch: 15 },
       { wch: 15 },
       { wch: 20 },
+      { wch: 15 },
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
@@ -542,6 +554,7 @@ export default function AdminDashboard() {
         'رقم الملف': player.file_number || 'غير محدد',
         'الفرع': player.branch || 'غير محدد',
         'الهيئة': player.authority || 'غير محدد',
+        'النوع': getPlayerTypeName(player.player_type || ''),
         'نوع القيد': player.registration_type || 'غير محدد',
         'تاريخ التسجيل للموسم': player.season_registration_date ? formatDate(player.season_registration_date) : 'غير محدد',
         'تاريخه': player.registration_date || 'غير محدد',
@@ -562,6 +575,7 @@ export default function AdminDashboard() {
         'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
         'الفرع': '',
         'الهيئة': '',
+        'النوع': '',
         'نوع القيد': '',
         'تاريخ التسجيل للموسم': '',
         'تاريخه': '',
@@ -582,6 +596,7 @@ export default function AdminDashboard() {
       { wch: 15 },
       { wch: 15 },
       { wch: 20 },
+      { wch: 15 },
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
@@ -622,17 +637,12 @@ export default function AdminDashboard() {
     return names[belt] || belt;
   };
 
-  const getBeltColor = (belt: string) => {
-    const colors: Record<string, string> = {
-      white: 'bg-gray-200 text-gray-800',
-      yellow: 'bg-yellow-200 text-yellow-800',
-      orange: 'bg-orange-200 text-orange-800',
-      green: 'bg-green-200 text-green-800',
-      blue: 'bg-blue-200 text-blue-800',
-      brown: 'bg-amber-700 text-white',
-      black: 'bg-gray-900 text-white',
+  const getPlayerTypeName = (type: string) => {
+    const types: Record<string, string> = {
+      male: 'ذكر',
+      female: 'أنثى',
     };
-    return colors[belt] || 'bg-gray-200 text-gray-800';
+    return types[type] || type || 'غير محدد';
   };
 
   return (
@@ -768,17 +778,20 @@ export default function AdminDashboard() {
           <div className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                {{
-                  organizations: 'النوادي ومراكز الشباب',
-                  coaches: 'المدربين',
-                  players: 'اللاعبين',
-                  exam_periods: 'فترات الاختبار',
-                  secondary_periods: 'فترات التسجيل الثانوي',
-                  tournament_periods: 'فترات البطولات',
-                  exam_registrations: 'تسجيلات الاختبارات',
-                  secondary_registrations: 'تسجيلات التسجيل الثانوي',
-                  tournament_registrations: 'تسجيلات البطولات'
-                }[activeTab] || 'غير محدد'}
+                {(function() {
+                  const titles: Record<TabType, string> = {
+                    organizations: 'النوادي ومراكز الشباب',
+                    coaches: 'المدربين',
+                    players: 'اللاعبين',
+                    exam_periods: 'فترات الاختبار',
+                    secondary_periods: 'فترات التسجيل الثانوي',
+                    tournament_periods: 'فترات البطولات',
+                    exam_registrations: 'تسجيلات الاختبارات',
+                    secondary_registrations: 'تسجيلات التسجيل الثانوي',
+                    tournament_registrations: 'تسجيلات البطولات'
+                  };
+                  return titles[activeTab];
+                })()}
               </h2>
               <div className="flex flex-wrap gap-2">
                 {activeTab === 'players' && (
@@ -1283,6 +1296,14 @@ function PlayersTable({
     return colors[belt] || 'bg-gray-200 text-gray-800';
   };
 
+  const getPlayerTypeName = (type: string) => {
+    const types: Record<string, string> = {
+      male: 'ذكر',
+      female: 'أنثى',
+    };
+    return types[type] || type || 'غير محدد';
+  };
+
   return (
     <>
       <div className="block md:hidden space-y-4">
@@ -1317,6 +1338,9 @@ function PlayersTable({
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">الرقم القومي:</span> {player.national_id || 'غير محدد'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">النوع:</span> {getPlayerTypeName(player.player_type || '')}
                 </p>
                 <p className="text-sm text-gray-600">
                   <span className="font-medium">نوع القيد:</span> {player.registration_type || 'غير محدد'}
@@ -1357,6 +1381,7 @@ function PlayersTable({
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الفرع</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الهيئة</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الرقم القومي</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">النوع</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">نوع القيد</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخ التسجيل للموسم</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">تاريخه</th>
@@ -1378,6 +1403,9 @@ function PlayersTable({
               <td className="px-6 py-4 text-sm text-gray-600">{player.branch || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{player.authority || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{player.national_id || 'غير محدد'}</td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {getPlayerTypeName(player.player_type || '')}
+              </td>
               <td className="px-6 py-4 text-sm text-gray-600">{player.registration_type || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">
                 {player.season_registration_date ? formatDate(player.season_registration_date) : 'غير محدد'}
@@ -1716,6 +1744,14 @@ function RegistrationsTable({
     return coach?.organization?.name || 'غير محدد';
   };
 
+  const getPlayerTypeName = (type: string) => {
+    const types: Record<string, string> = {
+      male: 'ذكر',
+      female: 'أنثى',
+    };
+    return types[type] || type || 'غير محدد';
+  };
+
   const getPeriodName = (reg: any) => {
     if (type === 'exam') {
       return reg.exam_period?.name || 'غير محدد';
@@ -1762,6 +1798,9 @@ function RegistrationsTable({
                   <span className="font-medium">الفرع:</span> {reg.player?.branch || 'غير محدد'}
                 </p>
                 <p className="text-sm text-gray-600">
+                  <span className="font-medium">النوع:</span> {getPlayerTypeName(reg.player?.player_type || '')}
+                </p>
+                <p className="text-sm text-gray-600">
                   <span className="font-medium">تاريخ الميلاد:</span> {reg.player?.birth_date ? formatDate(reg.player.birth_date) : 'غير محدد'}
                 </p>
                 <p className="text-sm text-gray-600">
@@ -1787,6 +1826,7 @@ function RegistrationsTable({
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الحزام</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الرقم القومي</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">الفرع</th>
+            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">النوع</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المدرب</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">المؤسسة</th>
             <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">{getPeriodField()}</th>
@@ -1808,6 +1848,9 @@ function RegistrationsTable({
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">
                 {reg.player?.branch || 'غير محدد'}
+              </td>
+              <td className="px-6 py-4 text-sm text-gray-600">
+                {getPlayerTypeName(reg.player?.player_type || '')}
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">{reg.coach?.full_name || 'غير محدد'}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{getCoachOrganization(reg.coach_id)}</td>
@@ -2016,6 +2059,7 @@ function FormModal({
       branch: formData.branch || null,
       authority: formData.authority || null,
       national_id: formData.national_id || null,
+      player_type: formData.player_type || null,
       registration_type: formData.registration_type || null,
       season_registration_date: formData.season_registration_date || null,
       registration_date: formData.registration_date || null,
@@ -2098,6 +2142,9 @@ function FormModal({
       exam_periods: 'فترات الاختبار',
       secondary_periods: 'فترات التسجيل الثانوي',
       tournament_periods: 'فترات البطولات',
+      exam_registrations: 'تسجيلات الاختبارات',
+      secondary_registrations: 'تسجيلات التسجيل الثانوي',
+      tournament_registrations: 'تسجيلات البطولات'
     };
     return `${editingId ? 'تعديل' : 'إضافة'} ${titles[type]}`;
   };
@@ -2344,6 +2391,20 @@ function FormModal({
                     onChange={(e) => setFormData({ ...formData, authority: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    النوع
+                  </label>
+                  <select
+                    value={formData.player_type || ''}
+                    onChange={(e) => setFormData({ ...formData, player_type: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">اختر النوع</option>
+                    <option value="male">ذكر</option>
+                    <option value="female">أنثى</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
