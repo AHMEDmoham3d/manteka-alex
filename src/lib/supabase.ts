@@ -30,6 +30,7 @@ export interface Coach extends Profile {
 }
 
 export interface Player {
+  player_type: string;
   organization: any;
   id: string;
   full_name: string;
@@ -41,6 +42,7 @@ export interface Player {
   created_at: string;
   coach?: Profile;
   registered?: boolean;
+  secondaryRegistered?: boolean;
   national_id?: string | null;
   branch?: string | null;
   authority?: string | null;
@@ -68,6 +70,25 @@ export interface ExamPeriod {
 export interface ExamRegistration {
   id: string;
   exam_period_id: string;
+  player_id: string;
+  coach_id: string;
+  player_name: string;
+  birth_date: string | null;
+  last_belt: string | null;
+  registered_at: string;
+}
+
+export interface SecondaryRegistrationPeriod {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+}
+
+export interface SecondaryRegistration {
+  id: string;
+  secondary_period_id: string;
   player_id: string;
   coach_id: string;
   player_name: string;
