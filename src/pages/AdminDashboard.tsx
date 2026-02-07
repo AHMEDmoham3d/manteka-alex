@@ -650,7 +650,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -673,7 +673,7 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-xl shadow-sm border mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
           <div className="border-b">
             <nav className="flex -mb-px overflow-x-auto">
               <button
@@ -822,7 +822,7 @@ export default function AdminDashboard() {
             </div>
 
             {activeTab === 'exam_registrations' && (
-              <div className="mb-6 bg-blue-50 p-4 rounded-lg">
+              <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -831,7 +831,7 @@ export default function AdminDashboard() {
                     <select
                       value={selectedExamPeriod}
                       onChange={(e) => setSelectedExamPeriod(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
                     >
                       <option value="all">جميع فترات الاختبار</option>
                       {examPeriods.map((period) => (
@@ -848,7 +848,7 @@ export default function AdminDashboard() {
                     <select
                       value={selectedExamCoach}
                       onChange={(e) => setSelectedExamCoach(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
                     >
                       <option value="all">جميع المدربين</option>
                       {coaches.map((coach) => (
@@ -868,14 +868,14 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-blue-700">
+                <div className="mt-4 text-sm text-blue-600">
                   عدد التسجيلات: <span className="font-bold">{examRegistrations.length}</span>
                 </div>
               </div>
             )}
 
             {activeTab === 'secondary_registrations' && (
-              <div className="mb-6 bg-amber-50 p-4 rounded-lg">
+              <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -884,7 +884,7 @@ export default function AdminDashboard() {
                     <select
                       value={selectedSecondaryPeriod}
                       onChange={(e) => setSelectedSecondaryPeriod(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-gray-900"
                     >
                       <option value="all">جميع فترات التسجيل الثانوي</option>
                       {secondaryPeriods.map((period) => (
@@ -901,7 +901,7 @@ export default function AdminDashboard() {
                     <select
                       value={selectedSecondaryCoach}
                       onChange={(e) => setSelectedSecondaryCoach(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-gray-900"
                     >
                       <option value="all">جميع المدربين</option>
                       {coaches.map((coach) => (
@@ -921,23 +921,23 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-amber-700">
+                <div className="mt-4 text-sm text-amber-600">
                   عدد التسجيلات: <span className="font-bold">{secondaryRegistrations.length}</span>
                 </div>
               </div>
             )}
 
             {activeTab === 'tournament_registrations' && (
-              <div className="mb-6 bg-purple-50 p-4 rounded-lg">
+              <div className="mb-6 bg-gray-800 p-4 rounded-lg border border-gray-700">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       تصفية حسب فترة البطولة
                     </label>
                     <select
                       value={selectedTournamentPeriod}
                       onChange={(e) => setSelectedTournamentPeriod(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-700 text-white"
                     >
                       <option value="all">جميع فترات البطولات</option>
                       {tournamentPeriods.map((period) => (
@@ -948,13 +948,13 @@ export default function AdminDashboard() {
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       تصفية حسب المدرب
                     </label>
                     <select
                       value={selectedTournamentCoach}
                       onChange={(e) => setSelectedTournamentCoach(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-700 text-white"
                     >
                       <option value="all">جميع المدربين</option>
                       {coaches.map((coach) => (
@@ -974,7 +974,7 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-purple-700">
+                <div className="mt-4 text-sm text-purple-400">
                   عدد التسجيلات: <span className="font-bold">{tournamentRegistrations.length}</span>
                 </div>
               </div>
