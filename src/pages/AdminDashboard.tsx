@@ -615,13 +615,16 @@ export default function AdminDashboard() {
     const fileName = `تقرير_اللاعبين_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
     
-    alert(`تم تحميل ملف ${fileName} بنجاح`);
+  alert(`تم تحميل ملف ${fileName} بنجاح`);
   };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'غير محدد';
     const date = new Date(dateString);
-    return date.toLocaleDateString('ar-EG');
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   const getBeltName = (belt: string) => {

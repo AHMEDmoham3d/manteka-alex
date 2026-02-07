@@ -1,22 +1,25 @@
-# CoachDashboard Redesign Tasks
+# CoachDashboard Redesign Plan
 
 ## Information Gathered
-- Page contains header, registered players section for exams, secondary registration section, and all players section
-- Uses Tailwind CSS with responsive design
-- Text in Arabic with RTL direction
+- Current design uses gradients and shadows but is described as ugly and unprofessional
+- Page includes: header with coach info, registered players sections (exam and secondary), all players grid
+- Uses Tailwind CSS with RTL direction
+- Needs global, professional look for important users
 
 ## Plan
-- [ ] Redesign header with modern style using gradients and better icons
-- [ ] Improve registered players cards with professional design using shadows and gradients
-- [ ] Develop player cards in grid to be distinctive with better layout and advanced colors
-- [ ] Enhance buttons with gradients, hover effects, and better fonts
-- [ ] Use advanced and consistent color palette
-- [ ] Add transitions and effects to improve user experience
-- [ ] Ensure responsiveness for mobile devices
+- [ ] Update color scheme to professional corporate palette (grays, blues, minimal gradients)
+- [ ] Redesign header with clean layout and better typography
+- [ ] Improve registered players sections with modern card designs
+- [ ] Enhance player cards with professional styling and better layout
+- [ ] Upgrade tables to sleek, modern design
+- [ ] Polish buttons with sophisticated hover effects
+- [ ] Improve spacing, typography, and responsive design
+- [ ] Add subtle animations and micro-interactions
 
 ## Dependent Files
-- No other files need editing
+- src/pages/CoachDashboard.tsx (main file to edit)
 
 ## Followup Steps
-- [x] Test the design and display the page to confirm the result
-- [ ] Redesign registered players sections for exams and secondary registration
+- [ ] Test responsive design on different screen sizes
+- [ ] Verify accessibility and contrast ratios
+- [ ] Check performance of animations
