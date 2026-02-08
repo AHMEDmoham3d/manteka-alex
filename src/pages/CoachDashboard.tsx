@@ -4,6 +4,7 @@ import { supabase, Player, Coach } from '../lib/supabase';
 import type { ExamPeriod, SecondaryRegistrationPeriod } from '../lib/supabase';
 import { LogOut, Search, UserCircle, CheckCircle, XCircle, Download, BookOpen, Users } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
 
 export default function CoachDashboard() {
   const { signOut, user } = useAuth();
@@ -145,146 +146,309 @@ export default function CoachDashboard() {
     }
   };
 
-  const downloadRegisteredPlayers = () => {
+  const downloadRegisteredPlayers = async () => {
     if (registeredPlayers.length === 0) {
       alert('لا يوجد لاعبين مسجلين في الاختبار للتحميل');
       return;
     }
 
-    // تحضير البيانات للتصدير
-    const exportData = registeredPlayers.map((player, index) => {
-      const playerData = players.find(p => p.id === player.player_id);
-      return {
-        'م': index + 1,
-        'اسم اللاعب': player.player_name,
-        'الحزام الأخير': getBeltName(player.last_belt || 'white'),
-        'تاريخ الميلاد': player.birth_date ? formatDate(player.birth_date) : 'غير محدد',
-        'رقم الملف': playerData?.file_number || 'غير محدد',
-        'تاريخ التسجيل': formatDate(player.created_at),
-        'رقم تسجيل اللاعب': player.player_id,
-        'رقم تسجيل المدرب': player.coach_id || user?.id,
-        'فترة الاختبار': activeExam ? `${activeExam.start_date} إلى ${activeExam.end_date}` : 'غير محدد'
-      };
-    });
+    try {
+      // جلب بيانات إضافية للاعبين
+      const playersWithDetails = await Promise.all(
+        registeredPlayers.map(async (reg) => {
+          const playerData = players.find(p => p.id === reg.player_id);
+          
+          // جلب تاريخ الحصول على الحزام الحالي (مثال - يمكن تعديله حسب قاعدة البيانات)
+          let beltObtainedDate = 'غير محدد';
+          try {
+            const { data: beltData } = await supabase
+              .from('player_belt_history')
+              .select('obtained_date')
+              .eq('player_id', reg.player_id)
+              .eq('belt', reg.last_belt || playerData?.belt)
+              .order('obtained_date', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            
+            if (beltData?.obtained_date) {
+              beltObtainedDate = formatDate(beltData.obtained_date);
+            }
+          } catch (error) {
+            console.error('Error fetching belt history:', error);
+          }
 
-    // إضافة معلومات إضافية
-    const summary = [
-      {},
-      {
-        'م': 'ملخص',
-        'اسم اللاعب': `إجمالي عدد اللاعبين: ${registeredPlayers.length}`,
-        'الحزام الأخير': `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
-        'تاريخ الميلاد': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'رقم الملف': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'تاريخ التسجيل': '',
-        'رقم تسجيل اللاعب': '',
-        'رقم تسجيل المدرب': '',
-        'فترة الاختبار': ''
-      },
-      {}
-    ];
+          return {
+            ...reg,
+            playerDetails: playerData,
+            beltObtainedDate,
+            result: 'قيد المراجعة' // يمكن تعديله حسب النظام
+          };
+        })
+      );
 
-    const finalData = [...exportData, ...summary];
+      // إنشاء جدول البيانات
+      const tableRows = [
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph("رقم الملف")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("الإســـــــــــم")], width: { size: 25, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("الميلاد")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("الحزام الحالي")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("تاريخ الحصول عليه")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("النتيجة")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+          ],
+        }),
+        ...playersWithDetails.map((player) => 
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(player.playerDetails?.file_number?.toString() || 'غير محدد')] }),
+              new TableCell({ children: [new Paragraph(player.player_name)] }),
+              new TableCell({ children: [new Paragraph(player.birth_date ? formatDate(player.birth_date) : 'غير محدد')] }),
+              new TableCell({ children: [new Paragraph(getBeltName(player.last_belt || 'white'))] }),
+              new TableCell({ children: [new Paragraph(player.beltObtainedDate)] }),
+              new TableCell({ children: [new Paragraph(player.result)] }),
+            ],
+          })
+        ),
+      ];
 
-    // إنشاء ورقة عمل
-    const ws = XLSX.utils.json_to_sheet(finalData, { skipHeader: false });
-    
-    // ضبط عرض الأعمدة
-    const wscols = [
-      { wch: 5 },  // م
-      { wch: 25 }, // اسم اللاعب
-      { wch: 15 }, // الحزام الأخير
-      { wch: 15 }, // تاريخ الميلاد
-      { wch: 15 }, // رقم الملف
-      { wch: 15 }, // تاريخ التسجيل
-      { wch: 20 }, // رقم تسجيل اللاعب
-      { wch: 20 }, // رقم تسجيل المدرب
-      { wch: 30 }  // فترة الاختبار
-    ];
-    ws['!cols'] = wscols;
+      // إنشاء المستند
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: [
+            new Paragraph({
+              text: "قائمة اللاعبين المسجلين في الاختبار",
+              heading: "Title",
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
+              alignment: "right",
+              spacing: { after: 200 },
+            }),
+            // new Paragraph({
+            //   text: `المؤسسة: ${coach?.organization?.name || 'غير محدد'}`,
+            //   alignment: "right",
+            //   spacing: { after: 200 },
+            // }),
+            new Paragraph({
+              text: `فترة الاختبار: ${activeExam ? `${activeExam.start_date} إلى ${activeExam.end_date}` : 'غير محدد'}`,
+              alignment: "right",
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `عدد اللاعبين: ${registeredPlayers.length}`,
+              alignment: "right",
+              spacing: { after: 400 },
+            }),
+            new Table({
+              rows: tableRows,
+              width: { size: 100, type: WidthType.PERCENTAGE },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "ملاحظات:",
+                  bold: true,
+                }),
+              ],
+              alignment: "right",
+              spacing: { before: 400 },
+            }),
+            new Paragraph({
+              text: "▪ يرجى التأكد من صحة البيانات المدخلة",
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: "▪ تم إنشاء هذا الملف تلقائياً من نظام إدارة الاختبارات",
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: `▪ تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: `▪ وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
+              alignment: "right",
+              spacing: { after: 400 },
+            }),
+            new Paragraph({
+              text: "التوقيع: _____________",
+              alignment: "left",
+            }),
+          ],
+        }],
+      });
 
-    // إنشاء مصنف وإضافة الورقة
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين المسجلين في الاختبار');
+      // تحميل الملف
+      const blob = await Packer.toBlob(doc);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `لاعبين_مسجلين_اختبار_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-    // توليد اسم الملف
-    const fileName = `لاعبين_مسجلين_اختبار_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    // تحميل الملف
-    XLSX.writeFile(wb, fileName);
-    
-    alert(`تم تحميل ملف ${fileName} بنجاح`);
+      alert(`تم تحميل ملف ${link.download} بنجاح`);
+    } catch (error) {
+      console.error('Error generating Word document:', error);
+      alert('حدث خطأ أثناء إنشاء الملف');
+    }
   };
 
-  const downloadSecondaryRegisteredPlayers = () => {
+  const downloadSecondaryRegisteredPlayers = async () => {
     if (secondaryRegisteredPlayers.length === 0) {
       alert('لا يوجد لاعبين مسجلين في التسجيل الثانوي للتحميل');
       return;
     }
 
-    // تحضير البيانات للتصدير
-    const exportData = secondaryRegisteredPlayers.map((player, index) => {
-      const playerData = players.find(p => p.id === player.player_id);
-      return {
-        'م': index + 1,
-        'اسم اللاعب': player.player_name,
-        'الحزام الأخير': getBeltName(player.last_belt || 'white'),
-        'تاريخ الميلاد': player.birth_date ? formatDate(player.birth_date) : 'غير محدد',
-        'رقم الملف': playerData?.file_number || 'غير محدد',
-        'تاريخ التسجيل': formatDate(player.created_at),
-        'رقم تسجيل اللاعب': player.player_id,
-        'رقم تسجيل المدرب': player.coach_id || user?.id,
-        'فترة التسجيل الثانوي': activeSecondaryRegistration ? `${activeSecondaryRegistration.start_date} إلى ${activeSecondaryRegistration.end_date}` : 'غير محدد'
-      };
-    });
+    try {
+      // جلب بيانات إضافية للاعبين
+      const playersWithDetails = await Promise.all(
+        secondaryRegisteredPlayers.map(async (reg) => {
+          const playerData = players.find(p => p.id === reg.player_id);
+          
+          // جلب تاريخ الحصول على الحزام الحالي
+          let beltObtainedDate = 'غير محدد';
+          try {
+            const { data: beltData } = await supabase
+              .from('player_belt_history')
+              .select('obtained_date')
+              .eq('player_id', reg.player_id)
+              .eq('belt', reg.last_belt || playerData?.belt)
+              .order('obtained_date', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            
+            if (beltData?.obtained_date) {
+              beltObtainedDate = formatDate(beltData.obtained_date);
+            }
+          } catch (error) {
+            console.error('Error fetching belt history:', error);
+          }
 
-    // إضافة معلومات إضافية
-    const summary = [
-      {},
-      {
-        'م': 'ملخص',
-        'اسم اللاعب': `إجمالي عدد اللاعبين: ${secondaryRegisteredPlayers.length}`,
-        'الحزام الأخير': `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
-        'تاريخ الميلاد': `المؤسسة: ${coach?.organization?.name || 'غير محدد'}`,
-        'رقم الملف': `تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
-        'تاريخ التسجيل': `وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
-        'رقم تسجيل اللاعب': '',
-        'رقم تسجيل المدرب': '',
-        'فترة التسجيل الثانوي': ''
-      },
-      {}
-    ];
+          return {
+            ...reg,
+            playerDetails: playerData,
+            beltObtainedDate,
+          };
+        })
+      );
 
-    const finalData = [...exportData, ...summary];
+      // إنشاء جدول البيانات
+      const tableRows = [
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph("رقم الملف")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("الإســـــــــــم")], width: { size: 25, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("الميلاد")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("الحزام الحالي")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("تاريخ الحصول عليه")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [new Paragraph("تاريخ التسجيل")], width: { size: 15, type: WidthType.PERCENTAGE } }),
+          ],
+        }),
+        ...playersWithDetails.map((player) => 
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(player.playerDetails?.file_number?.toString() || 'غير محدد')] }),
+              new TableCell({ children: [new Paragraph(player.player_name)] }),
+              new TableCell({ children: [new Paragraph(player.birth_date ? formatDate(player.birth_date) : 'غير محدد')] }),
+              new TableCell({ children: [new Paragraph(getBeltName(player.last_belt || 'white'))] }),
+              new TableCell({ children: [new Paragraph(player.beltObtainedDate)] }),
+              new TableCell({ children: [new Paragraph(formatDate(player.created_at))] }),
+            ],
+          })
+        ),
+      ];
 
-    // إنشاء ورقة عمل
-    const ws = XLSX.utils.json_to_sheet(finalData, { skipHeader: false });
-    
-    // ضبط عرض الأعمدة
-    const wscols = [
-      { wch: 5 },  // م
-      { wch: 25 }, // اسم اللاعب
-      { wch: 15 }, // الحزام الأخير
-      { wch: 15 }, // تاريخ الميلاد
-      { wch: 15 }, // رقم الملف
-      { wch: 15 }, // تاريخ التسجيل
-      { wch: 20 }, // رقم تسجيل اللاعب
-      { wch: 20 }, // رقم تسجيل المدرب
-      { wch: 30 }  // فترة التسجيل الثانوي
-    ];
-    ws['!cols'] = wscols;
+      // إنشاء المستند
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: [
+            new Paragraph({
+              text: "قائمة اللاعبين المسجلين في التسجيل الثانوي",
+              heading: "Title",
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: `اسم المدرب: ${coach?.full_name || 'غير محدد'}`,
+              alignment: "right",
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `المؤسسة: ${coach?.organization?.name || 'غير محدد'}`,
+              alignment: "right",
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `فترة التسجيل الثانوي: ${activeSecondaryRegistration ? `${activeSecondaryRegistration.start_date} إلى ${activeSecondaryRegistration.end_date}` : 'غير محدد'}`,
+              alignment: "right",
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `عدد اللاعبين: ${secondaryRegisteredPlayers.length}`,
+              alignment: "right",
+              spacing: { after: 400 },
+            }),
+            new Table({
+              rows: tableRows,
+              width: { size: 100, type: WidthType.PERCENTAGE },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "ملاحظات:",
+                  bold: true,
+                }),
+              ],
+              alignment: "right",
+              spacing: { before: 400 },
+            }),
+            new Paragraph({
+              text: "▪ هذا الملف خاص بالتسجيل الثانوي للاعبين",
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: "▪ تم إنشاء هذا الملف تلقائياً من نظام إدارة الاختبارات",
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: `▪ تاريخ التحميل: ${new Date().toLocaleDateString('ar-EG')}`,
+              alignment: "right",
+            }),
+            new Paragraph({
+              text: `▪ وقت التحميل: ${new Date().toLocaleTimeString('ar-EG')}`,
+              alignment: "right",
+              spacing: { after: 400 },
+            }),
+            new Paragraph({
+              text: "التوقيع: _____________",
+              alignment: "left",
+            }),
+          ],
+        }],
+      });
 
-    // إنشاء مصنف وإضافة الورقة
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'اللاعبين المسجلين في التسجيل الثانوي');
+      // تحميل الملف
+      const blob = await Packer.toBlob(doc);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `لاعبين_مسجلين_ثانوي_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-    // توليد اسم الملف
-    const fileName = `لاعبين_مسجلين_ثانوي_${coach?.full_name || 'مدرب'}_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    // تحميل الملف
-    XLSX.writeFile(wb, fileName);
-    
-    alert(`تم تحميل ملف ${fileName} بنجاح`);
+      alert(`تم تحميل ملف ${link.download} بنجاح`);
+    } catch (error) {
+      console.error('Error generating Word document:', error);
+      alert('حدث خطأ أثناء إنشاء الملف');
+    }
   };
 
   useEffect(() => {
@@ -495,8 +659,8 @@ export default function CoachDashboard() {
                   className="flex items-center justify-center gap-2 sm:gap-3 px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm text-sm sm:text-base"
                 >
                   <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">تحميل قائمة اللاعبين</span>
-                  <span className="sm:hidden">تحميل</span>
+                  <span className="hidden sm:inline">تحميل قائمة اللاعبين (Word)</span>
+                  <span className="sm:hidden">تحميل Word</span>
                 </button>
               </div>
             </div>
@@ -623,8 +787,8 @@ export default function CoachDashboard() {
                   className="flex items-center justify-center gap-1 sm:gap-2 px-3 py-2 sm:px-4 bg-amber-600 hover:bg-amber-700 text-white rounded transition-colors duration-200 font-medium text-sm sm:text-base"
                 >
                   <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">تحميل قائمة اللاعبين</span>
-                  <span className="sm:hidden">تحميل</span>
+                  <span className="hidden sm:inline">تحميل قائمة اللاعبين (Word)</span>
+                  <span className="sm:hidden">تحميل Word</span>
                 </button>
               </div>
             </div>

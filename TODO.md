@@ -1,25 +1,28 @@
-# CoachDashboard Redesign Plan
+# TODO: Modify Exam Registration Download to Match Template
+
+## Tasks
+- [ ] Modify downloadRegisteredPlayers function in CoachDashboard.tsx to match the template from "كشف إختبار حديث 2026.doc"
+- [ ] Add logo to the document (using public/logo.png)
+- [ ] Limit each document to 20 players max, create multiple files if more players
+- [ ] Ensure the document structure matches the template (title, coach info, table, etc.)
+- [ ] Test the functionality
 
 ## Information Gathered
-- Current design uses gradients and shadows but is described as ugly and unprofessional
-- Page includes: header with coach info, registered players sections (exam and secondary), all players grid
-- Uses Tailwind CSS with RTL direction
-- Needs global, professional look for important users
+- The template file "كشف إختبار حديث 2026.doc" contains the desired format for exam registration lists
+- Each document should have a logo, title, coach information, and a table with player data
+- Maximum 20 players per document; if more, create additional documents
+- This is for exam registrations only
 
 ## Plan
-- [ ] Update color scheme to professional corporate palette (grays, blues, minimal gradients)
-- [ ] Redesign header with clean layout and better typography
-- [ ] Improve registered players sections with modern card designs
-- [ ] Enhance player cards with professional styling and better layout
-- [ ] Upgrade tables to sleek, modern design
-- [ ] Polish buttons with sophisticated hover effects
-- [ ] Improve spacing, typography, and responsive design
-- [ ] Add subtle animations and micro-interactions
+1. Update the downloadRegisteredPlayers function to include logo and match template structure
+2. Implement logic to split players into chunks of 20
+3. Generate multiple documents if needed, with appropriate file names
+4. Add necessary imports for image handling in docx
 
 ## Dependent Files
 - src/pages/CoachDashboard.tsx (main file to edit)
 
 ## Followup Steps
-- [ ] Test responsive design on different screen sizes
-- [ ] Verify accessibility and contrast ratios
-- [ ] Check performance of animations
+- Test the download functionality
+- Verify the generated documents match the template
+- Ensure logo path is correct (public/logo.png)
